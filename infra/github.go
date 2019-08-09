@@ -62,23 +62,29 @@ func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
 		return nil, err
 	}
 
+	if err := g.saveConfig(githubConfig{
+		AccessToken: tok,
+	}); err != nil {
+		return nil, err
+	}
+
 	return cs.Adapt(), nil
 }
 
 func (g *GitHub) saveConfig(cnf githubConfig) error {
 	if loaded, err := loadConfig(); err == nil {
-		loaded.github = cnf
+		loaded.GitHub = cnf
 		return saveConfig(loaded)
 	}
 
 	return saveConfig(&config{
-		github: cnf,
+		GitHub: cnf,
 	})
 }
 
 func (g *GitHub) retieveAuthorization() (*oauth2.Token, error) {
 	if cnf, err := loadConfig(); err == nil {
-		return cnf.github.AccessToken, nil
+		return cnf.GitHub.AccessToken, nil
 	}
 
 	url := g.oauthCodeURL()
