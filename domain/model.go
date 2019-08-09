@@ -7,6 +7,10 @@ type Commit struct {
 	Diff *Diff
 }
 
+func (c Commit) String() string {
+	return fmt.Sprintf("%s: %s", c.ID, c.Diff)
+}
+
 type Diff struct {
 	Changes, Adds, Dels int
 }
