@@ -45,18 +45,21 @@ type oauth struct {
 }
 
 func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
-	var cs infragithub.Commits
-	if err := g.fetch(
-		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
-		url.Values{
-			"since": []string{today().Format(time.RFC3339)},
-		},
-		&cs,
-	); err != nil {
+	ids, err := g.fetchCommitIDs(owner, repo)
+	if err != nil {
 		return nil, err
 	}
 
-	return cs.Adapt(), nil
+	cs := make([]*domain.Commit, len(ids))
+	for i, id := range ids {
+		c, err := g.FetchCommit(owner, repo, id)
+		if err != nil {
+			return nil, err
+		}
+		cs[i] = c
+	}
+
+	return cs, nil
 }
 
 func (g *GitHub) fetchCommitIDs(owner, repo string) ([]string, error) {
