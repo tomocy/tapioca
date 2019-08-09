@@ -44,13 +44,13 @@ type oauth struct {
 	cnf   oauth2.Config
 }
 
-func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
+func (g *GitHub) FetchCommits(owner, repo string) (domain.Commits, error) {
 	ids, err := g.fetchCommitIDs(owner, repo)
 	if err != nil {
 		return nil, err
 	}
 
-	cs := make([]*domain.Commit, len(ids))
+	cs := make(domain.Commits, len(ids))
 	for i, id := range ids {
 		c, err := g.FetchCommit(owner, repo, id)
 		if err != nil {
