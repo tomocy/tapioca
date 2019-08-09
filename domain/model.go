@@ -2,6 +2,8 @@ package domain
 
 import "fmt"
 
+type Commits []*Commit
+
 type Commit struct {
 	ID   string
 	Diff *Diff
