@@ -69,7 +69,7 @@ func configFilename() string {
 }
 
 func workspaceName() string {
-	return filepath.Join(os.Getenv("HOME"), "./tapioca")
+	return filepath.Join(os.Getenv("HOME"), ".tapioca")
 }
 
 func readJSON(src io.Reader, dest interface{}) error {
@@ -81,7 +81,7 @@ func writeJSON(dest io.Writer, src interface{}) error {
 }
 
 type config struct {
-	github githubConfig
+	GitHub githubConfig
 }
 
 type githubConfig struct {
