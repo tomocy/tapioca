@@ -59,6 +59,19 @@ func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
 	return cs.Adapt(), nil
 }
 
+func (g *GitHub) FetchCommit(owner, repo, id string) (*domain.Commit, error) {
+	var c infragithub.Commit
+	if err := g.fetch(
+		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", owner, repo, id),
+		nil,
+		&c,
+	); err != nil {
+		return nil, err
+	}
+
+	return c.Adapt(), nil
+}
+
 func (g *GitHub) fetch(destURL string, params url.Values, dest interface{}) error {
 	tok, err := g.retieveAuthorization()
 	if err != nil {
