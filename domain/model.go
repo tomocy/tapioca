@@ -8,7 +8,6 @@ type Commit struct {
 }
 
 type Diff struct {
-	Base, Head          *Commit
 	Changes, Adds, Dels int
 }
 
