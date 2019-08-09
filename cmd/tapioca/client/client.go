@@ -1,6 +1,15 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/tomocy/tapioca/app"
+	"github.com/tomocy/tapioca/infra"
+)
+
+func newCommitUsecase() *app.CommitUsecase {
+	return app.NewCommitUsecase(infra.NewGitHub())
+}
 
 type config struct {
 	repo repo
