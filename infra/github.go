@@ -59,6 +59,26 @@ func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
 	return cs.Adapt(), nil
 }
 
+func (g *GitHub) fetchCommitIDs(owner, repo string) ([]string, error) {
+	var cs infragithub.Commits
+	if err := g.fetch(
+		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
+		url.Values{
+			"since": []string{today().Format(time.RFC3339)},
+		},
+		&cs,
+	); err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, len(cs))
+	for i, c := range cs {
+		ids[i] = c.SHA
+	}
+
+	return ids, nil
+}
+
 func (g *GitHub) FetchCommit(owner, repo, id string) (*domain.Commit, error) {
 	var c infragithub.Commit
 	if err := g.fetch(
