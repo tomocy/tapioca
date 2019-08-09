@@ -1,10 +1,17 @@
 package domain
 
+import "fmt"
+
 type Commit struct {
-	ID string
+	ID   string
+	Diff *Diff
 }
 
 type Diff struct {
 	Base, Head          *Commit
 	Changes, Adds, Dels int
+}
+
+func (d Diff) String() string {
+	return fmt.Sprintf("%d changes: %d adds, %d dels", d.Changes, d.Adds, d.Dels)
 }
