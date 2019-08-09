@@ -65,6 +65,10 @@ func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
 }
 
 func (g *GitHub) retieveAuthorization() (*oauth2.Token, error) {
+	if cnf, err := loadConfig(); err == nil {
+		return cnf.github.AccessToken, nil
+	}
+
 	url := g.oauthCodeURL()
 	fmt.Printf("open this link: %s\n", url)
 
