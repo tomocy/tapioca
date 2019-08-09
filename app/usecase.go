@@ -2,6 +2,12 @@ package app
 
 import "github.com/tomocy/tapioca/domain"
 
+func NewCommitUsecase(repo domain.CommitRepo) *CommitUsecase {
+	return &CommitUsecase{
+		repo: repo,
+	}
+}
+
 type CommitUsecase struct {
 	repo domain.CommitRepo
 }
