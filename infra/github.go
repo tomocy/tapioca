@@ -19,6 +19,7 @@ const (
 )
 
 func NewGitHub() *GitHub {
+	createWorkspace()
 	return &GitHub{
 		oauth: oauth{
 			cnf: oauth2.Config{
