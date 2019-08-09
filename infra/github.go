@@ -45,26 +45,14 @@ type oauth struct {
 }
 
 func (g *GitHub) FetchCommits(owner, repo string) ([]*domain.Commit, error) {
-	tok, err := g.retieveAuthorization()
-	if err != nil {
-		return nil, err
-	}
-
 	var cs infragithub.Commits
-	if err := g.do(&oauthReq{
-		tok:    tok,
-		method: http.MethodGet,
-		dest:   fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
-		params: url.Values{
+	if err := g.fetch(
+		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
+		url.Values{
 			"since": []string{today().Format(time.RFC3339)},
 		},
-	}, &cs); err != nil {
-		return nil, err
-	}
-
-	if err := g.saveConfig(githubConfig{
-		AccessToken: tok,
-	}); err != nil {
+		&cs,
+	); err != nil {
 		return nil, err
 	}
 
