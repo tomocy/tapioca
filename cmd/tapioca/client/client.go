@@ -115,6 +115,17 @@ func (h *Help) Run() error {
 	return h.err
 }
 
+func summarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {
+	report := reportFunc("summarize commits of today")
+	uc := newCommitUsecase()
+	s, err := uc.SummarizeCommitsOfToday(owner, repo)
+	if err != nil {
+		return nil, report(err)
+	}
+
+	return s, nil
+}
+
 func newCommitUsecase() *app.CommitUsecase {
 	return app.NewCommitUsecase(infra.NewGitHub())
 }

@@ -24,12 +24,9 @@ func (c *CLI) Run() error {
 }
 
 func (c *CLI) summarizeCommitsOfToday() error {
-	report := reportFunc("summarize commits of today")
-
-	uc := newCommitUsecase()
-	s, err := uc.SummarizeCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name)
+	s, err := summarizeCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name)
 	if err != nil {
-		return report(err)
+		return err
 	}
 
 	c.showSummary(*s)

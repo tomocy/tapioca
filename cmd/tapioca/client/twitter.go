@@ -22,12 +22,9 @@ func (t *Twitter) Run() error {
 }
 
 func (t *Twitter) summarizeCommitsOfToday() error {
-	report := reportFunc("summarize commits of today")
-
-	uc := newCommitUsecase()
-	s, err := uc.SummarizeCommitsOfToday(t.cnf.repo.owner, t.cnf.repo.name)
+	s, err := summarizeCommitsOfToday(t.cnf.repo.owner, t.cnf.repo.name)
 	if err != nil {
-		return report(err)
+		return err
 	}
 
 	t.showSummary(*s)
