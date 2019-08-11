@@ -78,6 +78,10 @@ const (
 
 type mode string
 
+const (
+	formatText format = "text"
+)
+
 type format string
 
 type repo struct {
