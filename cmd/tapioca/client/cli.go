@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/tomocy/tapioca/cmd/tapioca/client/view/ascii"
 	"github.com/tomocy/tapioca/domain"
 )
 
@@ -52,7 +53,7 @@ func (c *CLI) fetchCommits() error {
 }
 
 func (*CLI) showSummary(s *domain.Summary) {
-	fmt.Println(s)
+	fmt.Println(ascii.ColorizedSummary(*s))
 }
 
 func (*CLI) showCommits(cs domain.Commits) {
