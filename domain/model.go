@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -41,6 +42,9 @@ func (cs Commits) Authors() []string {
 		as[i] = a
 		i++
 	}
+	sort.Slice(as, func(i, j int) bool {
+		return as[i] < as[j]
+	})
 
 	return as
 }
