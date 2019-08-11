@@ -108,9 +108,9 @@ func (c *config) parseRepo(r string) error {
 func newPresenter(cnf config) presenter {
 	switch cnf.mode {
 	case modeCLI:
-		return newCLI(cnf)
+		return newCLI(newPrinter(cnf.format))
 	case modeTwitter:
-		return newTwitter(cnf)
+		return new(Twitter)
 	default:
 		return new(Help)
 	}
