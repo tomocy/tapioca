@@ -2,6 +2,10 @@ package domain
 
 import "fmt"
 
+type Repo struct {
+	Owner, Name string
+}
+
 type Commits []*Commit
 
 func (cs Commits) Diff() *Diff {
