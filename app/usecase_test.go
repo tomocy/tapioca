@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"log"
 	"testing"
 	"time"
 
@@ -35,7 +34,6 @@ func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
 	expectedCs := repo.cs[:1]
-	log.Println(expectedCs)
 	expected := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: "mock",

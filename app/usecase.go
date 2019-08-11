@@ -17,46 +17,35 @@ type CommitUsecase struct {
 }
 
 func (u *CommitUsecase) SummarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {
-	today := today()
-	sum := &domain.Summary{
-		Repo: &domain.Repo{
-			Owner: owner,
-			Name:  repo,
-		},
-		Date: today,
-	}
-	cs, err := u.repo.FetchCommits(owner, repo, &domain.Params{
-		Since: today,
+	return u.fetchCommits(owner, repo, &domain.Params{
+		Since: today(),
 	})
-	if err != nil {
-		return nil, err
-	}
-	sum.Commits = cs
-	sum.Diff = cs.Diff()
-
-	return sum, nil
 }
 
 func (u *CommitUsecase) SummarizeAuthorCommitsOfToday(owner, repo, author string) (*domain.Summary, error) {
+	return u.fetchCommits(owner, repo, &domain.Params{
+		Author: author,
+		Since:  today(),
+	})
+}
+
+func (u *CommitUsecase) fetchCommits(owner, repo string, params *domain.Params) (*domain.Summary, error) {
 	today := today()
-	sum := &domain.Summary{
+	s := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: owner,
 			Name:  repo,
 		},
 		Date: today,
 	}
-	cs, err := u.repo.FetchCommits(owner, repo, &domain.Params{
-		Author: author,
-		Since:  today,
-	})
+	cs, err := u.repo.FetchCommits(owner, repo, params)
 	if err != nil {
 		return nil, err
 	}
-	sum.Commits = cs
-	sum.Diff = cs.Diff()
+	s.Commits = cs
+	s.Diff = cs.Diff()
 
-	return sum, nil
+	return s, nil
 }
 
 func today() time.Time {
