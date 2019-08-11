@@ -30,6 +30,21 @@ func (r Repo) String() string {
 
 type Commits []*Commit
 
+func (cs Commits) Authors() []string {
+	am := make(map[string]bool)
+	for _, c := range cs {
+		am[c.Author] = true
+	}
+	as := make([]string, len(am))
+	var i int
+	for a := range am {
+		as[i] = a
+		i++
+	}
+
+	return as
+}
+
 func (cs Commits) Diff() *Diff {
 	diff := new(Diff)
 	diff.marge(cs.diffs()...)
