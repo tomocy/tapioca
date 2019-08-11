@@ -40,7 +40,7 @@ type Client interface {
 
 func parseConfig() (*config, error) {
 	m := flag.String("m", string(modeCLI), "name of mode")
-	f := flag.String("f", string(formatText), "name of format")
+	f := flag.String("f", formatText, "name of format")
 	r := flag.String("r", "", "name of owner/repo")
 	flag.Parse()
 
@@ -49,14 +49,14 @@ func parseConfig() (*config, error) {
 		return nil, err
 	}
 	cnf.mode = mode(*m)
-	cnf.format = format(*f)
+	cnf.format = *f
 
 	return cnf, nil
 }
 
 type config struct {
 	mode   mode
-	format format
+	format string
 	repo   repo
 }
 
@@ -81,7 +81,7 @@ const (
 
 type mode string
 
-func newPrinter(fmt format) printer {
+func newPrinter(fmt string) printer {
 	var p printer = new(formatPkg.Text)
 	switch fmt {
 	case formatColor:
@@ -96,11 +96,9 @@ type printer interface {
 }
 
 const (
-	formatText  format = "text"
-	formatColor format = "color"
+	formatText  = "text"
+	formatColor = "color"
 )
-
-type format string
 
 type repo struct {
 	owner, name string
