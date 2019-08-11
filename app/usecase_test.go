@@ -11,13 +11,14 @@ import (
 func TestSummarizeCommitsOfToday(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
+	expectedCs := repo.cs[:len(repo.cs)-1]
 	expected := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: "mock",
 			Name:  "mock",
 		},
-		Commits: repo.cs,
-		Diff:    repo.cs.Diff(),
+		Commits: expectedCs,
+		Diff:    expectedCs.Diff(),
 		Date:    today(),
 	}
 	actual, err := uc.SummarizeCommitsOfToday(expected.Repo.Owner, expected.Repo.Name)
@@ -104,6 +105,7 @@ func report(name string, actual, expected interface{}) error {
 }
 
 func newMock() *mock {
+	today := today().Add(1 * time.Second)
 	return &mock{
 		cs: domain.Commits{
 			&domain.Commit{
@@ -112,6 +114,7 @@ func newMock() *mock {
 					Changes: 3,
 					Adds:    3,
 				},
+				CreatedAt: today,
 			},
 			&domain.Commit{
 				ID: "b",
@@ -120,6 +123,7 @@ func newMock() *mock {
 					Adds:    2,
 					Dels:    1,
 				},
+				CreatedAt: today,
 			},
 			&domain.Commit{
 				ID: "c",
@@ -128,6 +132,7 @@ func newMock() *mock {
 					Adds:    1,
 					Dels:    2,
 				},
+				CreatedAt: today,
 			},
 			&domain.Commit{
 				ID: "d",
@@ -146,5 +151,16 @@ type mock struct {
 }
 
 func (m *mock) FetchCommits(owner, repo string, params *domain.Params) (domain.Commits, error) {
-	return m.cs, nil
+	if params == nil {
+		params = new(domain.Params)
+	}
+
+	var fetcheds domain.Commits
+	for _, c := range m.cs {
+		if c.CreatedAt.After(params.Since) {
+			fetcheds = append(fetcheds, c)
+		}
+	}
+
+	return fetcheds, nil
 }
