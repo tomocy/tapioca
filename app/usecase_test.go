@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"testing"
 	"time"
 
@@ -22,6 +23,29 @@ func TestSummarizeCommitsOfToday(t *testing.T) {
 		Date:    today(),
 	}
 	actual, err := uc.SummarizeCommitsOfToday(expected.Repo.Owner, expected.Repo.Name)
+	if err != nil {
+		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
+	}
+	if err := assertSummary(actual, expected); err != nil {
+		t.Errorf("unexpected summary by SummarizeCommitsOfToday: %s\n", err)
+	}
+}
+
+func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
+	repo := newMock()
+	uc := NewCommitUsecase(repo)
+	expectedCs := repo.cs[:1]
+	log.Println(expectedCs)
+	expected := &domain.Summary{
+		Repo: &domain.Repo{
+			Owner: "mock",
+			Name:  "mock",
+		},
+		Commits: expectedCs,
+		Diff:    expectedCs.Diff(),
+		Date:    today(),
+	}
+	actual, err := uc.SummarizeAuthorCommitsOfToday(expected.Repo.Owner, expected.Repo.Name, "alice")
 	if err != nil {
 		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
 	}
@@ -109,7 +133,8 @@ func newMock() *mock {
 	return &mock{
 		cs: domain.Commits{
 			&domain.Commit{
-				ID: "a",
+				ID:     "a",
+				Author: "alice",
 				Diff: &domain.Diff{
 					Changes: 3,
 					Adds:    3,
@@ -117,7 +142,8 @@ func newMock() *mock {
 				CreatedAt: today,
 			},
 			&domain.Commit{
-				ID: "b",
+				ID:     "b",
+				Author: "bob",
 				Diff: &domain.Diff{
 					Changes: 3,
 					Adds:    2,
@@ -126,7 +152,8 @@ func newMock() *mock {
 				CreatedAt: today,
 			},
 			&domain.Commit{
-				ID: "c",
+				ID:     "c",
+				Author: "cris",
 				Diff: &domain.Diff{
 					Changes: 3,
 					Adds:    1,
@@ -135,7 +162,8 @@ func newMock() *mock {
 				CreatedAt: today,
 			},
 			&domain.Commit{
-				ID: "d",
+				ID:     "d",
+				Author: "dave",
 				Diff: &domain.Diff{
 					Changes: 3,
 					Dels:    3,
@@ -157,9 +185,14 @@ func (m *mock) FetchCommits(owner, repo string, params *domain.Params) (domain.C
 
 	var fetcheds domain.Commits
 	for _, c := range m.cs {
-		if c.CreatedAt.After(params.Since) {
-			fetcheds = append(fetcheds, c)
+		if params.Author != "" && c.Author != params.Author {
+			continue
 		}
+		if !c.CreatedAt.After(params.Since) {
+			continue
+		}
+
+		fetcheds = append(fetcheds, c)
 	}
 
 	return fetcheds, nil
