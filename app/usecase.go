@@ -17,19 +17,19 @@ type CommitUsecase struct {
 }
 
 func (u *CommitUsecase) SummarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {
-	return u.fetchCommits(owner, repo, &domain.Params{
+	return u.fetchCommits(owner, repo, domain.Params{
 		Since: today(),
 	})
 }
 
 func (u *CommitUsecase) SummarizeAuthorCommitsOfToday(owner, repo, author string) (*domain.Summary, error) {
-	return u.fetchCommits(owner, repo, &domain.Params{
+	return u.fetchCommits(owner, repo, domain.Params{
 		Author: author,
 		Since:  today(),
 	})
 }
 
-func (u *CommitUsecase) fetchCommits(owner, repo string, params *domain.Params) (*domain.Summary, error) {
+func (u *CommitUsecase) fetchCommits(owner, repo string, params domain.Params) (*domain.Summary, error) {
 	today := today()
 	s := &domain.Summary{
 		Repo: &domain.Repo{

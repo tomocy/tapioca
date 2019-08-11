@@ -176,11 +176,7 @@ type mock struct {
 	date time.Time
 }
 
-func (m *mock) FetchCommits(owner, repo string, params *domain.Params) (domain.Commits, error) {
-	if params == nil {
-		params = new(domain.Params)
-	}
-
+func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
 	var fetcheds domain.Commits
 	for _, c := range m.cs {
 		if params.Author != "" && c.Author != params.Author {

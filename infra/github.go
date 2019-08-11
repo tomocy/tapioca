@@ -44,7 +44,7 @@ type oauth struct {
 	cnf   oauth2.Config
 }
 
-func (g *GitHub) FetchCommits(owner, repo string, params *domain.Params) (domain.Commits, error) {
+func (g *GitHub) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
 	ids, err := g.fetchCommitIDs(owner, repo, params)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (g *GitHub) FetchCommits(owner, repo string, params *domain.Params) (domain
 	return cs, nil
 }
 
-func (g *GitHub) fetchCommitIDs(owner, repo string, params *domain.Params) ([]string, error) {
+func (g *GitHub) fetchCommitIDs(owner, repo string, params domain.Params) ([]string, error) {
 	var cs infragithub.Commits
 	if err := g.fetch(
 		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
@@ -80,7 +80,7 @@ func (g *GitHub) fetchCommitIDs(owner, repo string, params *domain.Params) ([]st
 	return ids, nil
 }
 
-func (g *GitHub) parseParams(params *domain.Params) url.Values {
+func (g *GitHub) parseParams(params domain.Params) url.Values {
 	vs := make(url.Values)
 	if params.Author != "" {
 		vs.Set("author", params.Author)
