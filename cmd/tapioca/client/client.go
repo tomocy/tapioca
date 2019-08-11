@@ -42,6 +42,7 @@ func newCommitUsecase() *app.CommitUsecase {
 
 func parseConfig() (*config, error) {
 	m := flag.String("m", string(modeCLI), "name of mode")
+	f := flag.String("f", string(formatText), "name of format")
 	r := flag.String("r", "", "name of owner/repo")
 	flag.Parse()
 
@@ -50,13 +51,15 @@ func parseConfig() (*config, error) {
 		return nil, err
 	}
 	cnf.mode = mode(*m)
+	cnf.format = format(*f)
 
 	return cnf, nil
 }
 
 type config struct {
-	mode mode
-	repo repo
+	mode   mode
+	format format
+	repo   repo
 }
 
 func (c *config) parseRepo(r string) error {
