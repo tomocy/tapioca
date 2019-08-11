@@ -23,7 +23,7 @@ func TestSummarizeCommitsOfToday(t *testing.T) {
 	}
 	actual, err := uc.SummarizeCommitsOfToday(expected.Repo.Owner, expected.Repo.Name)
 	if err != nil {
-		t.Errorf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
+		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
 	}
 	if err := assertSummary(actual, expected); err != nil {
 		t.Errorf("unexpected summary by SummarizeCommitsOfToday: %s\n", err)
