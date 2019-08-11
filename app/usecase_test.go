@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/tomocy/tapioca/domain"
 )
@@ -10,7 +11,7 @@ import (
 func TestFetchCommits(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
-	actuals, err := uc.FetchCommits("mock", "mock")
+	actuals, err := uc.FetchCommitsOfToday("mock", "mock")
 	if err != nil {
 		t.Errorf("unexpected error by FetchCommits: got %s, expect nil\n", err)
 	}
@@ -98,6 +99,6 @@ type mock struct {
 	cs domain.Commits
 }
 
-func (m *mock) FetchCommits(owner, repo string) (domain.Commits, error) {
+func (m *mock) FetchCommitsSinceDate(owner, repo string, date time.Time) (domain.Commits, error) {
 	return m.cs, nil
 }
