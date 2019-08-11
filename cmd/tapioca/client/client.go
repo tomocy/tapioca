@@ -41,6 +41,10 @@ type config struct {
 	repo repo
 }
 
+const (
+	modeCLI mode = "cli"
+)
+
 type mode string
 
 type repo struct {
