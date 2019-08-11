@@ -1,6 +1,16 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
+
+type Summary struct {
+	Repo    *Repo
+	Commits []*Commit
+	Diff    *Diff
+	Date    time.Time
+}
 
 type Repo struct {
 	Owner, Name string
