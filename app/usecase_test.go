@@ -17,6 +17,7 @@ func TestSummarizeCommitsOfToday(t *testing.T) {
 			Owner: "mock",
 			Name:  "mock",
 		},
+		Authors: []string{"alice", "bob", "cris"},
 		Commits: expectedCs,
 		Diff:    expectedCs.Diff(),
 		Date:    today(),
@@ -39,11 +40,12 @@ func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 			Owner: "mock",
 			Name:  "mock",
 		},
+		Authors: []string{"alice"},
 		Commits: expectedCs,
 		Diff:    expectedCs.Diff(),
 		Date:    today(),
 	}
-	actual, err := uc.SummarizeAuthorCommitsOfToday(expected.Repo.Owner, expected.Repo.Name, "alice")
+	actual, err := uc.SummarizeAuthorCommitsOfToday(expected.Repo.Owner, expected.Repo.Name, expected.Authors[0])
 	if err != nil {
 		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
 	}
@@ -55,6 +57,14 @@ func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 func assertSummary(actual, expected *domain.Summary) error {
 	if err := assertRepo(actual.Repo, expected.Repo); err != nil {
 		return fmt.Errorf("unexpected repo of summary: %s", err)
+	}
+	if len(actual.Authors) != len(expected.Authors) {
+		return reportUnexpected("len of authors of summary", len(actual.Authors), len(expected.Authors))
+	}
+	for i, expected := range expected.Authors {
+		if actual.Authors[i] != expected {
+			return reportUnexpected(fmt.Sprintf("authors[%d] of summary", i), actual.Authors[i], expected)
+		}
 	}
 	if err := assertCommits(actual.Commits, expected.Commits); err != nil {
 		return fmt.Errorf("unexpected commits of summary: %s", err)

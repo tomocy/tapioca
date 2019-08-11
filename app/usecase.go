@@ -43,6 +43,7 @@ func (u *CommitUsecase) fetchAndSummarizeCommits(owner, repo string, params doma
 		return nil, err
 	}
 	s.Commits = cs
+	s.Authors = cs.Authors()
 	s.Diff = cs.Diff()
 
 	return s, nil
