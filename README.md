@@ -7,7 +7,7 @@ go install github.com/tomocy/tapioca/cmd/tapioca
 ```
 
 ## Example
-- Summarize commits to tomocy/tapioca by tomocy in 2019/08/12
+- Summarize commits to tomocy/tapioca in 2019/08/12
 ```
 $ date
 Mon Aug 12 03:50:56 JST 2019
