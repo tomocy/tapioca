@@ -78,6 +78,8 @@ const (
 
 type mode string
 
+type format string
+
 type repo struct {
 	owner, name string
 }
