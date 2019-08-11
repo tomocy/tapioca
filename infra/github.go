@@ -44,8 +44,8 @@ type oauth struct {
 	cnf   oauth2.Config
 }
 
-func (g *GitHub) FetchCommitsSinceDate(owner, repo string, date time.Time) (domain.Commits, error) {
-	ids, err := g.fetchCommitIDsSinceDate(owner, repo, date)
+func (g *GitHub) FetchCommits(owner, repo string, params *domain.Params) (domain.Commits, error) {
+	ids, err := g.fetchCommitIDs(owner, repo, params)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +62,11 @@ func (g *GitHub) FetchCommitsSinceDate(owner, repo string, date time.Time) (doma
 	return cs, nil
 }
 
-func (g *GitHub) fetchCommitIDsSinceDate(owner, repo string, date time.Time) ([]string, error) {
+func (g *GitHub) fetchCommitIDs(owner, repo string, params *domain.Params) ([]string, error) {
 	var cs infragithub.Commits
 	if err := g.fetch(
 		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
-		url.Values{
-			"since": []string{date.Format(time.RFC3339)},
-		},
+		g.parseParams(params),
 		&cs,
 	); err != nil {
 		return nil, err
@@ -80,6 +78,15 @@ func (g *GitHub) fetchCommitIDsSinceDate(owner, repo string, date time.Time) ([]
 	}
 
 	return ids, nil
+}
+
+func (g *GitHub) parseParams(params *domain.Params) url.Values {
+	vs := make(url.Values)
+	if !params.Since.IsZero() {
+		vs.Set("since", params.Since.Format(time.RFC3339))
+	}
+
+	return vs
 }
 
 func (g *GitHub) FetchCommit(owner, repo, id string) (*domain.Commit, error) {

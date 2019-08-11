@@ -25,7 +25,9 @@ func (u *CommitUsecase) SummarizeCommitsOfToday(owner, repo string) (*domain.Sum
 		},
 		Date: today,
 	}
-	cs, err := u.repo.FetchCommitsSinceDate(owner, repo, today)
+	cs, err := u.repo.FetchCommits(owner, repo, &domain.Params{
+		Since: today,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +38,7 @@ func (u *CommitUsecase) SummarizeCommitsOfToday(owner, repo string) (*domain.Sum
 }
 
 func (u *CommitUsecase) FetchCommitsOfToday(owner, repo string) (domain.Commits, error) {
-	return u.repo.FetchCommitsSinceDate(owner, repo, today())
+	return u.repo.FetchCommits(owner, repo, nil)
 }
 
 func today() time.Time {
