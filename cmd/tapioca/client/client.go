@@ -39,7 +39,7 @@ type Client interface {
 }
 
 func parseConfig() (*config, error) {
-	m := flag.String("m", string(modeCLI), "name of mode")
+	m := flag.String("m", modeCLI, "name of mode")
 	f := flag.String("f", formatText, "name of format")
 	r := flag.String("r", "", "name of owner/repo")
 	flag.Parse()
@@ -48,14 +48,14 @@ func parseConfig() (*config, error) {
 	if err := cnf.parseRepo(*r); err != nil {
 		return nil, err
 	}
-	cnf.mode = mode(*m)
+	cnf.mode = *m
 	cnf.format = *f
 
 	return cnf, nil
 }
 
 type config struct {
-	mode   mode
+	mode   string
 	format string
 	repo   repo
 }
@@ -75,11 +75,9 @@ func (c *config) parseRepo(r string) error {
 }
 
 const (
-	modeCLI     mode = "cli"
-	modeTwitter mode = "twitter"
+	modeCLI     = "cli"
+	modeTwitter = "twitter"
 )
-
-type mode string
 
 func newPrinter(fmt string) printer {
 	var p printer = new(formatPkg.Text)
