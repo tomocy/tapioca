@@ -42,11 +42,13 @@ func parseConfig() (*config, error) {
 	m := flag.String("m", modeCLI, "name of mode")
 	f := flag.String("f", formatText, "name of format")
 	r := flag.String("r", "", "name of owner/repo")
+	a := flag.String("a", "", "name of author")
 	flag.Parse()
 
 	cnf := &config{
 		mode:   *m,
 		format: *f,
+		author: *a,
 	}
 	if err := cnf.parseRepo(*r); err != nil {
 		return nil, err
@@ -59,6 +61,7 @@ type config struct {
 	mode   string
 	format string
 	repo   repo
+	author string
 }
 
 func (c *config) parseRepo(r string) error {
