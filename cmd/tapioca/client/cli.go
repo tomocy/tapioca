@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/tomocy/tapioca/cmd/tapioca/client/view/ascii"
 	"github.com/tomocy/tapioca/domain"
 )
 
@@ -32,7 +32,7 @@ func (c *CLI) summarizeCommitsOfToday() error {
 		return report(err)
 	}
 
-	c.showSummary(s)
+	c.showSummary(*s)
 
 	return nil
 }
@@ -51,8 +51,8 @@ func (c *CLI) fetchCommits() error {
 	return nil
 }
 
-func (*CLI) showSummary(s *domain.Summary) {
-	fmt.Println(ascii.ColorizedSummary(*s))
+func (c *CLI) showSummary(s domain.Summary) {
+	c.printer.PrintSummary(os.Stdout, s)
 }
 
 func (*CLI) showCommits(cs domain.Commits) {
