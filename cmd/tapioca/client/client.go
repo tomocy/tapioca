@@ -4,9 +4,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/tomocy/tapioca/app"
+	"github.com/tomocy/tapioca/domain"
 	"github.com/tomocy/tapioca/infra"
 )
 
@@ -97,4 +99,8 @@ type Help struct {
 func (h *Help) Run() error {
 	flag.Usage()
 	return h.err
+}
+
+type printer interface {
+	PrintSummary(io.Writer, domain.Summary)
 }
