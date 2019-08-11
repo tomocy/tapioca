@@ -8,6 +8,55 @@ import (
 	"github.com/tomocy/tapioca/domain"
 )
 
+func TestSummarizeCommitsOfToday(t *testing.T) {
+	repo := newMock()
+	uc := NewCommitUsecase(repo)
+	expected := &domain.Summary{
+		Repo: &domain.Repo{
+			Owner: "mock",
+			Name:  "mock",
+		},
+		Commits: repo.cs,
+		Diff:    repo.cs.Diff(),
+		Date:    today(),
+	}
+	actual, err := uc.SummarizeCommitsOfToday(expected.Repo.Owner, expected.Repo.Name)
+	if err != nil {
+		t.Errorf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
+	}
+	if err := assertSummary(actual, expected); err != nil {
+		t.Errorf("unexpected summary by SummarizeCommitsOfToday: %s\n", err)
+	}
+}
+
+func assertSummary(actual, expected *domain.Summary) error {
+	if err := assertRepo(actual.Repo, expected.Repo); err != nil {
+		return fmt.Errorf("unexpected repo of summary: %s", err)
+	}
+	if err := assertCommits(actual.Commits, expected.Commits); err != nil {
+		return fmt.Errorf("unexpected commits of summary: %s", err)
+	}
+	if err := assertDiff(actual.Diff, expected.Diff); err != nil {
+		return fmt.Errorf("unexpected diff of summary: %s", err)
+	}
+	if !actual.Date.Equal(expected.Date) {
+		return reportUnexpected("date of summary", actual.Date, expected.Date)
+	}
+
+	return nil
+}
+
+func assertRepo(actual, expected *domain.Repo) error {
+	if actual.Owner != expected.Owner {
+		return reportUnexpected("owner of repo", actual.Owner, expected.Owner)
+	}
+	if actual.Name != expected.Name {
+		return reportUnexpected("name of repo", actual.Name, expected.Name)
+	}
+
+	return nil
+}
+
 func TestFetchCommits(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
@@ -23,6 +72,19 @@ func TestFetchCommits(t *testing.T) {
 			t.Errorf("unexpected commit by FetchCommits: %s\n", err)
 		}
 	}
+}
+
+func assertCommits(actuals, expecteds []*domain.Commit) error {
+	if len(actuals) != len(expecteds) {
+		return reportUnexpected("len of commits", len(actuals), len(expecteds))
+	}
+	for i, expected := range expecteds {
+		if err := assertCommit(actuals[i], expected); err != nil {
+			return fmt.Errorf("unexpected commits[%d]: %s", i, err)
+		}
+	}
+
+	return nil
 }
 
 func assertCommit(actual, expected *domain.Commit) error {
@@ -96,7 +158,8 @@ func newMock() *mock {
 }
 
 type mock struct {
-	cs domain.Commits
+	cs   domain.Commits
+	date time.Time
 }
 
 func (m *mock) FetchCommitsSinceDate(owner, repo string, date time.Time) (domain.Commits, error) {
