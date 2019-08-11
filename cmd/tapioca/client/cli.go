@@ -19,7 +19,22 @@ type CLI struct {
 }
 
 func (c *CLI) Run() error {
+	if c.cnf.author != "" {
+		return c.summarizeAuthorCommitsOfToday()
+	}
+
 	return c.summarizeCommitsOfToday()
+}
+
+func (c *CLI) summarizeAuthorCommitsOfToday() error {
+	s, err := summarizeAuthorCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.author)
+	if err != nil {
+		return err
+	}
+
+	c.showSummary(*s)
+
+	return nil
 }
 
 func (c *CLI) summarizeCommitsOfToday() error {
