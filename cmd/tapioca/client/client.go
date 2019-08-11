@@ -78,6 +78,10 @@ func (c *config) parseRepo(r string) error {
 	return nil
 }
 
+type presenter interface {
+	ShowSummary(domain.Summary)
+}
+
 const (
 	modeCLI     = "cli"
 	modeTwitter = "twitter"
