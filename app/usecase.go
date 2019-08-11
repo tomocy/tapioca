@@ -16,6 +16,25 @@ type CommitUsecase struct {
 	repo domain.CommitRepo
 }
 
+func (u *CommitUsecase) SummarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {
+	today := today()
+	sum := &domain.Summary{
+		Repo: &domain.Repo{
+			Owner: owner,
+			Name:  repo,
+		},
+		Date: today,
+	}
+	cs, err := u.repo.FetchCommitsSinceDate(owner, repo, today)
+	if err != nil {
+		return nil, err
+	}
+	sum.Commits = cs
+	sum.Diff = cs.Diff()
+
+	return sum, nil
+}
+
 func (u *CommitUsecase) FetchCommitsOfToday(owner, repo string) (domain.Commits, error) {
 	return u.repo.FetchCommitsSinceDate(owner, repo, today())
 }
