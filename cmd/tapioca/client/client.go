@@ -10,6 +10,10 @@ import (
 	"github.com/tomocy/tapioca/infra"
 )
 
+type Client interface {
+	Run() error
+}
+
 func newCommitUsecase() *app.CommitUsecase {
 	return app.NewCommitUsecase(infra.NewGitHub())
 }
