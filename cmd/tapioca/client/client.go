@@ -80,3 +80,5 @@ func reportFunc(did string) func(err error) error {
 func report(did string, err error) error {
 	return fmt.Errorf("failed to %s: %s", did, err)
 }
+
+type Help struct{}
