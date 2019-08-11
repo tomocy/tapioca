@@ -25,6 +25,8 @@ func New() Client {
 	switch cnf.mode {
 	case modeCLI:
 		client = newCLI(*cnf)
+	case modeTwitter:
+		client = newTwitter(*cnf)
 	default:
 		client = new(Help)
 	}
@@ -73,7 +75,8 @@ func (c *config) parseRepo(r string) error {
 }
 
 const (
-	modeCLI mode = "cli"
+	modeCLI     mode = "cli"
+	modeTwitter mode = "twitter"
 )
 
 type mode string
