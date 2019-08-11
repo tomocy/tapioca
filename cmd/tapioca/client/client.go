@@ -44,12 +44,13 @@ func parseConfig() (*config, error) {
 	r := flag.String("r", "", "name of owner/repo")
 	flag.Parse()
 
-	cnf := new(config)
+	cnf := &config{
+		mode:   *m,
+		format: *f,
+	}
 	if err := cnf.parseRepo(*r); err != nil {
 		return nil, err
 	}
-	cnf.mode = *m
-	cnf.format = *f
 
 	return cnf, nil
 }
