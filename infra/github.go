@@ -82,6 +82,9 @@ func (g *GitHub) fetchCommitIDs(owner, repo string, params *domain.Params) ([]st
 
 func (g *GitHub) parseParams(params *domain.Params) url.Values {
 	vs := make(url.Values)
+	if params.Author != "" {
+		vs.Set("author", params.Author)
+	}
 	if !params.Since.IsZero() {
 		vs.Set("since", params.Since.Format(time.RFC3339))
 	}
