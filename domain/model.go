@@ -12,6 +12,13 @@ type Summary struct {
 	Date    time.Time
 }
 
+func (s Summary) String() string {
+	return fmt.Sprintf(
+		"summary of commits to %s in %s\n%s",
+		s.Repo, s.Date.Format("2006/01/02"), s.Diff,
+	)
+}
+
 type Repo struct {
 	Owner, Name string
 }
