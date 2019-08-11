@@ -1,14 +1,21 @@
 package client
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/tomocy/tapioca/cmd/tapioca/client/view/ascii"
 	"github.com/tomocy/tapioca/domain"
 )
 
-type CLI struct{}
+func newCLI(cnf config) *CLI {
+	return &CLI{
+		cnf: cnf,
+	}
+}
+
+type CLI struct {
+	cnf config
+}
 
 func (c *CLI) Run() error {
 	return c.summarizeCommitsOfToday()
@@ -16,14 +23,9 @@ func (c *CLI) Run() error {
 
 func (c *CLI) summarizeCommitsOfToday() error {
 	report := reportFunc("summarize commits of today")
-	cnf, err := parseConfig()
-	if err != nil {
-		flag.Usage()
-		return report(err)
-	}
 
 	uc := newCommitUsecase()
-	s, err := uc.SummarizeCommitsOfToday(cnf.repo.owner, cnf.repo.name)
+	s, err := uc.SummarizeCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name)
 	if err != nil {
 		return report(err)
 	}
@@ -35,14 +37,9 @@ func (c *CLI) summarizeCommitsOfToday() error {
 
 func (c *CLI) fetchCommits() error {
 	report := reportFunc("fetch commits")
-	cnf, err := parseConfig()
-	if err != nil {
-		flag.Usage()
-		return report(err)
-	}
 
 	uc := newCommitUsecase()
-	cs, err := uc.FetchCommitsOfToday(cnf.repo.owner, cnf.repo.name)
+	cs, err := uc.FetchCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name)
 	if err != nil {
 		return report(err)
 	}
