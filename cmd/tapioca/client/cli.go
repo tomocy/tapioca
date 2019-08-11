@@ -48,6 +48,10 @@ func (c *CLI) summarizeCommitsOfToday() error {
 	return nil
 }
 
+func (c *CLI) ShowSummary(s domain.Summary) {
+	c.printer.PrintSummary(os.Stdout, s)
+}
+
 func (c *CLI) showSummary(s domain.Summary) {
 	c.printer.PrintSummary(os.Stdout, s)
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/tomocy/tapioca/infra"
 )
 
-func New() Client {
+func New() Runner {
 	cnf, err := parseConfig()
 	if err != nil {
 		return &Help{
@@ -21,21 +21,48 @@ func New() Client {
 		}
 	}
 
-	var client Client
-	switch cnf.mode {
-	case modeCLI:
-		client = newCLI(*cnf)
-	case modeTwitter:
-		client = newTwitter(*cnf)
-	default:
-		client = new(Help)
+	return &Client{
+		cnf:       *cnf,
+		presenter: newPresenter(*cnf),
 	}
-
-	return client
 }
 
-type Client interface {
+type Runner interface {
 	Run() error
+}
+
+type Client struct {
+	cnf       config
+	presenter presenter
+}
+
+func (c *Client) Run() error {
+	s, err := c.summarize()
+	if err != nil {
+		return err
+	}
+
+	c.presenter.ShowSummary(*s)
+
+	return nil
+}
+
+func (c *Client) summarize() (*domain.Summary, error) {
+	var s *domain.Summary
+	var err error
+	var report func(error) error
+	if c.cnf.author != "" {
+		s, err = summarizeAuthorCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.author)
+		report = reportFunc("summarize author commits of today")
+	} else {
+		s, err = summarizeCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name)
+		report = reportFunc("summarize commits of today")
+	}
+	if err != nil {
+		return nil, report(err)
+	}
+
+	return s, nil
 }
 
 func parseConfig() (*config, error) {
@@ -78,6 +105,17 @@ func (c *config) parseRepo(r string) error {
 	return nil
 }
 
+func newPresenter(cnf config) presenter {
+	switch cnf.mode {
+	case modeCLI:
+		return newCLI(cnf)
+	case modeTwitter:
+		return newTwitter(cnf)
+	default:
+		return new(Help)
+	}
+}
+
 type presenter interface {
 	ShowSummary(domain.Summary)
 }
@@ -117,6 +155,10 @@ type Help struct {
 func (h *Help) Run() error {
 	flag.Usage()
 	return h.err
+}
+
+func (h *Help) ShowSummary(domain.Summary) {
+	flag.Usage()
 }
 
 func summarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {

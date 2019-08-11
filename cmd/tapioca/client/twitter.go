@@ -47,6 +47,15 @@ func (t *Twitter) summarizeCommitsOfToday() error {
 	return nil
 }
 
+func (t *Twitter) ShowSummary(s domain.Summary) {
+	parsed, _ := url.Parse("https://twitter.com/intent/tweet")
+	parsed.RawQuery = url.Values{
+		"text": []string{s.String()},
+	}.Encode()
+
+	browser.OpenURL(parsed.String())
+}
+
 func (t *Twitter) showSummary(s domain.Summary) {
 	parsed, _ := url.Parse("https://twitter.com/intent/tweet")
 	parsed.RawQuery = url.Values{
