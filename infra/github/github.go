@@ -24,12 +24,16 @@ type Commit struct {
 			Date time.Time `json:"date"`
 		} `json:"author"`
 	} `json:"commit"`
+	Author struct {
+		Login string `json:"login"`
+	}
 	Files []*Diff `json:"files"`
 }
 
 func (c *Commit) Adapt() *domain.Commit {
 	return &domain.Commit{
 		ID:        c.SHA,
+		Author:    c.Author.Login,
 		Diff:      c.adaptDiff(),
 		CreatedAt: c.Commit.Author.Date,
 	}
