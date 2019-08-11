@@ -57,23 +57,6 @@ func assertRepo(actual, expected *domain.Repo) error {
 	return nil
 }
 
-func TestFetchCommits(t *testing.T) {
-	repo := newMock()
-	uc := NewCommitUsecase(repo)
-	actuals, err := uc.FetchCommitsOfToday("mock", "mock")
-	if err != nil {
-		t.Errorf("unexpected error by FetchCommits: got %s, expect nil\n", err)
-	}
-	if len(actuals) != len(repo.cs) {
-		t.Fatalf("unexpected len commits by FetchCommits: got %d, expect %d\n", len(actuals), len(repo.cs))
-	}
-	for i, expected := range repo.cs {
-		if err := assertCommit(actuals[i], expected); err != nil {
-			t.Errorf("unexpected commit by FetchCommits: %s\n", err)
-		}
-	}
-}
-
 func assertCommits(actuals, expecteds []*domain.Commit) error {
 	if len(actuals) != len(expecteds) {
 		return reportUnexpected("len of commits", len(actuals), len(expecteds))
@@ -162,6 +145,6 @@ type mock struct {
 	date time.Time
 }
 
-func (m *mock) FetchCommitsSinceDate(owner, repo string, date time.Time) (domain.Commits, error) {
+func (m *mock) FetchCommits(owner, repo string, params *domain.Params) (domain.Commits, error) {
 	return m.cs, nil
 }
