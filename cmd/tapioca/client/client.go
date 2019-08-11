@@ -37,8 +37,11 @@ func parseConfig() (*config, error) {
 }
 
 type config struct {
+	mode mode
 	repo repo
 }
+
+type mode string
 
 type repo struct {
 	owner, name string
