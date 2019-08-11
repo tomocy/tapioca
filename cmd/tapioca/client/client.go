@@ -11,13 +11,22 @@ import (
 )
 
 func New() Client {
-	cnf, _ := parseConfig()
+	cnf, err := parseConfig()
+	if err != nil {
+		return &Help{
+			err: err,
+		}
+	}
+
+	var client Client
 	switch cnf.mode {
 	case modeCLI:
-		return newCLI(*cnf)
+		client = newCLI(*cnf)
 	default:
-		return nil
+		client = new(Help)
 	}
+
+	return client
 }
 
 type Client interface {
