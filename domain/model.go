@@ -69,3 +69,7 @@ func (d *Diff) marge(ts ...*Diff) {
 		d.Dels += t.Dels
 	}
 }
+
+type Params struct {
+	Since time.Time
+}
