@@ -7,6 +7,7 @@ import (
 
 type Summary struct {
 	Repo    *Repo
+	Authors []string
 	Commits []*Commit
 	Diff    *Diff
 	Date    time.Time
