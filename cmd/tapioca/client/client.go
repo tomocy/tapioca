@@ -10,6 +10,16 @@ import (
 	"github.com/tomocy/tapioca/infra"
 )
 
+func New() Client {
+	cnf, _ := parseConfig()
+	switch cnf.mode {
+	case modeCLI:
+		return newCLI(*cnf)
+	default:
+		return nil
+	}
+}
+
 type Client interface {
 	Run() error
 }
