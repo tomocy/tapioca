@@ -12,3 +12,5 @@ type Text struct{}
 func (t *Text) PrintSummary(w io.Writer, s domain.Summary) {
 	fmt.Fprintln(w, s)
 }
+
+type Color struct{}
