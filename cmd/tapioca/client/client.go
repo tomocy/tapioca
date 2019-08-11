@@ -19,26 +19,34 @@ func newCommitUsecase() *app.CommitUsecase {
 }
 
 func parseConfig() (*config, error) {
-	var r string
-	flag.StringVar(&r, "r", "", "name of owner/repo")
+	r := flag.String("r", "", "name of owner/repo")
 	flag.Parse()
 
-	splited := strings.Split(r, "/")
-	if len(splited) != 2 {
-		return nil, errors.New("invalid format of repo: the format of the name should be owner/repo")
+	cnf := new(config)
+	if err := cnf.parseRepo(*r); err != nil {
+		return nil, err
 	}
 
-	return &config{
-		repo: repo{
-			owner: splited[0],
-			name:  splited[1],
-		},
-	}, nil
+	return cnf, nil
 }
 
 type config struct {
 	mode mode
 	repo repo
+}
+
+func (c *config) parseRepo(r string) error {
+	splited := strings.Split(r, "/")
+	if len(splited) != 2 {
+		return errors.New("invalid format of repo: the format of the name should be owner/repo")
+	}
+
+	c.repo = repo{
+		owner: splited[0],
+		name:  splited[1],
+	}
+
+	return nil
 }
 
 const (
