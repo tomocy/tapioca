@@ -9,7 +9,8 @@ import (
 
 func newCLI(cnf config) *CLI {
 	return &CLI{
-		cnf: cnf,
+		cnf:     cnf,
+		printer: newPrinter(cnf.format),
 	}
 }
 
