@@ -46,8 +46,9 @@ func (cs Commits) diffs() []*Diff {
 }
 
 type Commit struct {
-	ID   string
-	Diff *Diff
+	ID        string
+	Diff      *Diff
+	CreatedAt time.Time
 }
 
 func (c Commit) String() string {
