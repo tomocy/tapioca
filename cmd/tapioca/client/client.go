@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tomocy/tapioca/app"
+	formatPkg "github.com/tomocy/tapioca/cmd/tapioca/client/format"
 	"github.com/tomocy/tapioca/domain"
 	"github.com/tomocy/tapioca/infra"
 )
@@ -105,6 +106,10 @@ type Help struct {
 func (h *Help) Run() error {
 	flag.Usage()
 	return h.err
+}
+
+func newPrinter(fmt format) printer {
+	return new(formatPkg.Text)
 }
 
 type printer interface {
