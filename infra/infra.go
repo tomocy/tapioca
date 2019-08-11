@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 
 	"golang.org/x/oauth2"
 )
@@ -30,11 +29,6 @@ func createWorkspace() error {
 	}
 
 	return f.Close()
-}
-
-func today() time.Time {
-	now := time.Now()
-	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 }
 
 func loadConfig() (*config, error) {

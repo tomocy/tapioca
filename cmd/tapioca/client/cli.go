@@ -24,7 +24,7 @@ func (c *CLI) fetchCommits() error {
 	}
 
 	uc := newCommitUsecase()
-	cs, err := uc.FetchCommits(cnf.repo.owner, cnf.repo.name)
+	cs, err := uc.FetchCommitsOfToday(cnf.repo.owner, cnf.repo.name)
 	if err != nil {
 		return report(err)
 	}

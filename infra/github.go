@@ -44,8 +44,8 @@ type oauth struct {
 	cnf   oauth2.Config
 }
 
-func (g *GitHub) FetchCommits(owner, repo string) (domain.Commits, error) {
-	ids, err := g.fetchCommitIDs(owner, repo)
+func (g *GitHub) FetchCommitsSinceDate(owner, repo string, date time.Time) (domain.Commits, error) {
+	ids, err := g.fetchCommitIDsSinceDate(owner, repo, date)
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +62,12 @@ func (g *GitHub) FetchCommits(owner, repo string) (domain.Commits, error) {
 	return cs, nil
 }
 
-func (g *GitHub) fetchCommitIDs(owner, repo string) ([]string, error) {
+func (g *GitHub) fetchCommitIDsSinceDate(owner, repo string, date time.Time) ([]string, error) {
 	var cs infragithub.Commits
 	if err := g.fetch(
 		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
 		url.Values{
-			"since": []string{today().Format(time.RFC3339)},
+			"since": []string{date.Format(time.RFC3339)},
 		},
 		&cs,
 	); err != nil {

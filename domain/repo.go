@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type CommitRepo interface {
-	FetchCommits(owner, repo string) (Commits, error)
+	FetchCommitsSinceDate(owner, repo string, date time.Time) (Commits, error)
 }
