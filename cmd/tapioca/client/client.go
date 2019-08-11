@@ -82,3 +82,8 @@ func report(did string, err error) error {
 }
 
 type Help struct{}
+
+func (h *Help) Run() error {
+	flag.Usage()
+	return nil
+}
