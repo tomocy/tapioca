@@ -47,6 +47,7 @@ func (cs Commits) diffs() []*Diff {
 
 type Commit struct {
 	ID        string
+	Author    string
 	Diff      *Diff
 	CreatedAt time.Time
 }
