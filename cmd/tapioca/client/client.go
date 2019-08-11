@@ -79,7 +79,13 @@ const (
 type mode string
 
 func newPrinter(fmt format) printer {
-	return new(formatPkg.Text)
+	var p printer = new(formatPkg.Text)
+	switch fmt {
+	case formatColor:
+		p = new(formatPkg.Color)
+	}
+
+	return p
 }
 
 type printer interface {
@@ -87,7 +93,8 @@ type printer interface {
 }
 
 const (
-	formatText format = "text"
+	formatText  format = "text"
+	formatColor format = "color"
 )
 
 type format string
