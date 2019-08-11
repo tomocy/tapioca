@@ -81,9 +81,11 @@ func report(did string, err error) error {
 	return fmt.Errorf("failed to %s: %s", did, err)
 }
 
-type Help struct{}
+type Help struct {
+	err error
+}
 
 func (h *Help) Run() error {
 	flag.Usage()
-	return nil
+	return h.err
 }
