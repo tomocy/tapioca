@@ -1,6 +1,8 @@
 package github
 
 import (
+	"time"
+
 	"github.com/tomocy/tapioca/domain"
 )
 
@@ -16,14 +18,20 @@ func (cs Commits) Adapt() []*domain.Commit {
 }
 
 type Commit struct {
-	SHA   string  `json:"sha"`
+	SHA    string `json:"sha"`
+	Commit struct {
+		Author struct {
+			Date time.Time `json:"date"`
+		} `json:"author"`
+	} `json:"commit"`
 	Files []*Diff `json:"files"`
 }
 
 func (c *Commit) Adapt() *domain.Commit {
 	return &domain.Commit{
-		ID:   c.SHA,
-		Diff: c.adaptDiff(),
+		ID:        c.SHA,
+		Diff:      c.adaptDiff(),
+		CreatedAt: c.Commit.Author.Date,
 	}
 }
 
