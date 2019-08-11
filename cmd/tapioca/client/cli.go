@@ -14,7 +14,8 @@ func newCLI(cnf config) *CLI {
 }
 
 type CLI struct {
-	cnf config
+	cnf     config
+	printer printer
 }
 
 func (c *CLI) Run() error {
