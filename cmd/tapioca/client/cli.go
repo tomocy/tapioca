@@ -1,10 +1,8 @@
 package client
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"strings"
 
 	"github.com/tomocy/tapioca/domain"
 )
@@ -17,7 +15,7 @@ func (c *CLI) Run() error {
 
 func (c *CLI) summarizeCommitsOfToday() error {
 	report := reportFunc("summarize commits of today")
-	cnf, err := c.parseConfig()
+	cnf, err := parseConfig()
 	if err != nil {
 		flag.Usage()
 		return report(err)
@@ -36,7 +34,7 @@ func (c *CLI) summarizeCommitsOfToday() error {
 
 func (c *CLI) fetchCommits() error {
 	report := reportFunc("fetch commits")
-	cnf, err := c.parseConfig()
+	cnf, err := parseConfig()
 	if err != nil {
 		flag.Usage()
 		return report(err)
@@ -51,24 +49,6 @@ func (c *CLI) fetchCommits() error {
 	c.showCommits(cs)
 
 	return nil
-}
-
-func (c *CLI) parseConfig() (*config, error) {
-	var r string
-	flag.StringVar(&r, "r", "", "name of owner/repo")
-	flag.Parse()
-
-	splited := strings.Split(r, "/")
-	if len(splited) != 2 {
-		return nil, errors.New("invalid format of repo: the format of the name should be owner/repo")
-	}
-
-	return &config{
-		repo: repo{
-			owner: splited[0],
-			name:  splited[1],
-		},
-	}, nil
 }
 
 func (*CLI) showSummary(s *domain.Summary) {
