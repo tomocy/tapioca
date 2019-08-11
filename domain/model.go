@@ -16,6 +16,10 @@ type Repo struct {
 	Owner, Name string
 }
 
+func (r Repo) String() string {
+	return fmt.Sprintf("%s/%s", r.Owner, r.Name)
+}
+
 type Commits []*Commit
 
 func (cs Commits) Diff() *Diff {
