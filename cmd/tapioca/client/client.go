@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/tomocy/tapioca/app"
-	formatPkg "github.com/tomocy/tapioca/cmd/tapioca/client/format"
 	"github.com/tomocy/tapioca/domain"
 	"github.com/tomocy/tapioca/infra"
 )
@@ -126,10 +125,10 @@ const (
 )
 
 func newPrinter(fmt string) printer {
-	var p printer = new(formatPkg.Text)
+	var p printer = new(Text)
 	switch fmt {
 	case formatColor:
-		p = new(formatPkg.Color)
+		p = new(Color)
 	}
 
 	return p
