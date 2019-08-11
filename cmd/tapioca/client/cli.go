@@ -12,7 +12,7 @@ import (
 type CLI struct{}
 
 func (c *CLI) Run() error {
-	return c.fetchCommits()
+	return c.summarizeCommitsOfToday()
 }
 
 func (c *CLI) summarizeCommitsOfToday() error {
