@@ -36,10 +36,6 @@ type Client interface {
 	Run() error
 }
 
-func newCommitUsecase() *app.CommitUsecase {
-	return app.NewCommitUsecase(infra.NewGitHub())
-}
-
 func parseConfig() (*config, error) {
 	m := flag.String("m", string(modeCLI), "name of mode")
 	f := flag.String("f", string(formatText), "name of format")
@@ -82,6 +78,14 @@ const (
 
 type mode string
 
+func newPrinter(fmt format) printer {
+	return new(formatPkg.Text)
+}
+
+type printer interface {
+	PrintSummary(io.Writer, domain.Summary)
+}
+
 const (
 	formatText format = "text"
 )
@@ -90,16 +94,6 @@ type format string
 
 type repo struct {
 	owner, name string
-}
-
-func reportFunc(did string) func(err error) error {
-	return func(err error) error {
-		return report(did, err)
-	}
-}
-
-func report(did string, err error) error {
-	return fmt.Errorf("failed to %s: %s", did, err)
 }
 
 type Help struct {
@@ -111,10 +105,16 @@ func (h *Help) Run() error {
 	return h.err
 }
 
-func newPrinter(fmt format) printer {
-	return new(formatPkg.Text)
+func newCommitUsecase() *app.CommitUsecase {
+	return app.NewCommitUsecase(infra.NewGitHub())
 }
 
-type printer interface {
-	PrintSummary(io.Writer, domain.Summary)
+func reportFunc(did string) func(err error) error {
+	return func(err error) error {
+		return report(did, err)
+	}
+}
+
+func report(did string, err error) error {
+	return fmt.Errorf("failed to %s: %s", did, err)
 }
