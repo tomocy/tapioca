@@ -19,6 +19,7 @@ func newCommitUsecase() *app.CommitUsecase {
 }
 
 func parseConfig() (*config, error) {
+	m := flag.String("m", string(modeCLI), "name of mode")
 	r := flag.String("r", "", "name of owner/repo")
 	flag.Parse()
 
@@ -26,6 +27,7 @@ func parseConfig() (*config, error) {
 	if err := cnf.parseRepo(*r); err != nil {
 		return nil, err
 	}
+	cnf.mode = mode(*m)
 
 	return cnf, nil
 }
