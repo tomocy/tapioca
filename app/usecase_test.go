@@ -198,6 +198,9 @@ func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Co
 		if !params.Since.IsZero() && !c.CreatedAt.After(params.Since) {
 			continue
 		}
+		if !params.Until.IsZero() && !params.Until.Before(c.CreatedAt) {
+			continue
+		}
 
 		fetcheds = append(fetcheds, c)
 	}
