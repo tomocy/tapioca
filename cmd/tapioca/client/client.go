@@ -49,16 +49,13 @@ func (c *Client) Run() error {
 func (c *Client) summarize() (*domain.Summary, error) {
 	var s *domain.Summary
 	var err error
-	var report func(error) error
 	if c.cnf.author != "" {
-		s, err = summarizeAuthorCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.author)
-		report = reportFunc("summarize author commits of today")
+		s, err = summarizeAuthorCommits(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.author, c.cnf.day)
 	} else {
-		s, err = summarizeCommitsOfToday(c.cnf.repo.owner, c.cnf.repo.name)
-		report = reportFunc("summarize commits of today")
+		s, err = summarizeCommits(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.day)
 	}
 	if err != nil {
-		return nil, report(err)
+		return nil, err
 	}
 
 	return s, nil
@@ -67,14 +64,14 @@ func (c *Client) summarize() (*domain.Summary, error) {
 func parseConfig() (*config, error) {
 	m := flag.String("m", modeCLI, "name of mode")
 	f := flag.String("f", formatText, "name of format")
+	d := flag.String("d", dayToday, "day of commits to be summarized")
 	r := flag.String("r", "", "name of owner/repo")
 	a := flag.String("a", "", "name of author")
 	flag.Parse()
 
 	cnf := &config{
-		mode:   *m,
-		format: *f,
-		author: *a,
+		mode: *m, format: *f,
+		day: *d, author: *a,
 	}
 	if err := cnf.parseRepo(*r); err != nil {
 		return nil, err
@@ -86,6 +83,7 @@ func parseConfig() (*config, error) {
 type config struct {
 	mode   string
 	format string
+	day    string
 	repo   repo
 	author string
 }
@@ -141,6 +139,9 @@ type printer interface {
 const (
 	formatText  = "text"
 	formatColor = "color"
+
+	dayToday     = "today"
+	dayYesterday = "yesterday"
 )
 
 type repo struct {
@@ -160,10 +161,18 @@ func (h *Help) ShowSummary(domain.Summary) {
 	flag.Usage()
 }
 
-func summarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {
-	report := reportFunc("summarize commits of today")
+func summarizeCommits(owner, repo, day string) (*domain.Summary, error) {
 	uc := newCommitUsecase()
-	s, err := uc.SummarizeCommitsOfToday(owner, repo)
+	var summarize func(string, string) (*domain.Summary, error)
+	var report func(error) error
+	if day == dayToday {
+		summarize = uc.SummarizeCommitsOfToday
+		report = reportFunc("summarize commits of today")
+	} else {
+		summarize = uc.SummarizeCommitsOfYesterday
+		report = reportFunc("summarize commits of yesterday")
+	}
+	s, err := summarize(owner, repo)
 	if err != nil {
 		return nil, report(err)
 	}
@@ -171,10 +180,18 @@ func summarizeCommitsOfToday(owner, repo string) (*domain.Summary, error) {
 	return s, nil
 }
 
-func summarizeAuthorCommitsOfToday(owner, repo, author string) (*domain.Summary, error) {
-	report := reportFunc("summarize author commits of today")
+func summarizeAuthorCommits(owner, repo, author, day string) (*domain.Summary, error) {
 	uc := newCommitUsecase()
-	s, err := uc.SummarizeAuthorCommitsOfToday(owner, repo, author)
+	var summarize func(string, string, string) (*domain.Summary, error)
+	var report func(error) error
+	if day == dayToday {
+		summarize = uc.SummarizeAuthorCommitsOfToday
+		report = reportFunc("summarize author commits of today")
+	} else {
+		summarize = uc.SummarizeAuthorCommitsOfYesterday
+		report = reportFunc("summarize author commits of yesterday")
+	}
+	s, err := summarize(owner, repo, author)
 	if err != nil {
 		return nil, report(err)
 	}
