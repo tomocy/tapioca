@@ -165,12 +165,9 @@ func report(name string, actual, expected interface{}) error {
 
 func newMock() *mock {
 	m := new(mock)
-	m.todayCs = mockCs(today())
-	m.cs = append(m.cs, m.todayCs...)
-	m.yesterdayCs = mockCs(yesterday())
-	m.cs = append(m.cs, m.yesterdayCs...)
-	m.otherdayCs = mockCs(time.Time{})
-	m.cs = append(m.cs, m.otherdayCs...)
+	m.mockAndSetCs(today(), &m.todayCs)
+	m.mockAndSetCs(yesterday(), &m.yesterdayCs)
+	m.mockAndSetCs(time.Time{}, &m.otherdayCs)
 
 	return m
 }
@@ -214,6 +211,12 @@ type mock struct {
 	todayCs     domain.Commits
 	yesterdayCs domain.Commits
 	otherdayCs  domain.Commits
+}
+
+func (m *mock) mockAndSetCs(createdIn time.Time, dest *domain.Commits) {
+	cs := mockCs(createdIn)
+	*dest = cs
+	m.cs = append(m.cs, cs...)
 }
 
 func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
