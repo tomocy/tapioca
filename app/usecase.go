@@ -36,7 +36,7 @@ func (u *CommitUsecase) fetchAndSummarizeCommits(owner, repo string, params doma
 			Owner: owner,
 			Name:  repo,
 		},
-		Date: today,
+		Since: today,
 	}
 	cs, err := u.repo.FetchCommits(owner, repo, params)
 	if err != nil {

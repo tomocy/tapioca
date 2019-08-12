@@ -20,7 +20,7 @@ func TestSummarizeCommitsOfToday(t *testing.T) {
 		Authors: []string{"alice", "bob", "cris"},
 		Commits: expectedCs,
 		Diff:    expectedCs.Diff(),
-		Date:    today(),
+		Since:   today(),
 	}
 	actual, err := uc.SummarizeCommitsOfToday(expected.Repo.Owner, expected.Repo.Name)
 	if err != nil {
@@ -43,7 +43,7 @@ func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 		Authors: []string{"alice"},
 		Commits: expectedCs,
 		Diff:    expectedCs.Diff(),
-		Date:    today(),
+		Since:   today(),
 	}
 	actual, err := uc.SummarizeAuthorCommitsOfToday(expected.Repo.Owner, expected.Repo.Name, expected.Authors[0])
 	if err != nil {
@@ -72,8 +72,8 @@ func assertSummary(actual, expected *domain.Summary) error {
 	if err := assertDiff(actual.Diff, expected.Diff); err != nil {
 		return fmt.Errorf("unexpected diff of summary: %s", err)
 	}
-	if !actual.Date.Equal(expected.Date) {
-		return reportUnexpected("date of summary", actual.Date, expected.Date)
+	if !actual.Since.Equal(expected.Since) {
+		return reportUnexpected("since of summary", actual.Since, expected.Since)
 	}
 
 	return nil
