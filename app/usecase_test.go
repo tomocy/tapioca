@@ -31,6 +31,30 @@ func TestSummarizeCommitsOfToday(t *testing.T) {
 	}
 }
 
+func TestSummarizeCommitsOfYesterday(t *testing.T) {
+	repo := newMock()
+	uc := NewCommitUsecase(repo)
+	expectedCs := repo.yesterdayCs
+	expected := &domain.Summary{
+		Repo: &domain.Repo{
+			Owner: "mock",
+			Name:  "mock",
+		},
+		Authors: []string{"alice", "bob", "cris"},
+		Commits: expectedCs,
+		Diff:    expectedCs.Diff(),
+		Since:   yesterday(),
+		Until:   today(),
+	}
+	actual, err := uc.SummarizeCommitsOfYesterday(expected.Repo.Owner, expected.Repo.Name)
+	if err != nil {
+		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfYesterday", err, nil))
+	}
+	if err := assertSummary(actual, expected); err != nil {
+		t.Errorf("unexpected summary by SummarizeCommitsOfYesterday: %s\n", err)
+	}
+}
+
 func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
@@ -143,6 +167,8 @@ func newMock() *mock {
 	m := new(mock)
 	m.todayCs = mockCs(today())
 	m.cs = append(m.cs, m.todayCs...)
+	m.yesterdayCs = mockCs(yesterday())
+	m.cs = append(m.cs, m.yesterdayCs...)
 	m.otherdayCs = mockCs(time.Time{})
 	m.cs = append(m.cs, m.otherdayCs...)
 
@@ -184,9 +210,10 @@ func mockCs(createdIn time.Time) domain.Commits {
 }
 
 type mock struct {
-	cs         domain.Commits
-	todayCs    domain.Commits
-	otherdayCs domain.Commits
+	cs          domain.Commits
+	todayCs     domain.Commits
+	yesterdayCs domain.Commits
+	otherdayCs  domain.Commits
 }
 
 func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {

@@ -22,6 +22,13 @@ func (u *CommitUsecase) SummarizeCommitsOfToday(owner, repo string) (*domain.Sum
 	})
 }
 
+func (u *CommitUsecase) SummarizeCommitsOfYesterday(owner, repo string) (*domain.Summary, error) {
+	return u.fetchAndSummarizeCommits(owner, repo, domain.Params{
+		Since: yesterday(),
+		Until: today(),
+	})
+}
+
 func (u *CommitUsecase) SummarizeAuthorCommitsOfToday(owner, repo, author string) (*domain.Summary, error) {
 	return u.fetchAndSummarizeCommits(owner, repo, domain.Params{
 		Author: author,
@@ -47,6 +54,10 @@ func (u *CommitUsecase) fetchAndSummarizeCommits(owner, repo string, params doma
 	s.Diff = cs.Diff()
 
 	return s, nil
+}
+
+func yesterday() time.Time {
+	return today().Add(-24 * time.Hour)
 }
 
 func today() time.Time {
