@@ -75,6 +75,9 @@ func assertSummary(actual, expected *domain.Summary) error {
 	if !actual.Since.Equal(expected.Since) {
 		return reportUnexpected("since of summary", actual.Since, expected.Since)
 	}
+	if !actual.Until.Equal(expected.Until) {
+		return reportUnexpected("until of summary", actual.Until, expected.Until)
+	}
 
 	return nil
 }
