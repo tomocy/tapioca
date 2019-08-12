@@ -93,6 +93,6 @@ func (d *Diff) marge(ts ...*Diff) {
 }
 
 type Params struct {
-	Author string
-	Since  time.Time
+	Author       string
+	Since, Until time.Time
 }
