@@ -27,7 +27,8 @@ type Twitter struct{}
 func (t *Twitter) ShowSummary(s domain.Summary) {
 	parsed, _ := url.Parse("https://twitter.com/intent/tweet")
 	parsed.RawQuery = url.Values{
-		"text": []string{s.String()},
+		"text":     []string{s.String()},
+		"hashtags": []string{"tapioca"},
 	}.Encode()
 
 	browser.OpenURL(parsed.String())
