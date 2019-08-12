@@ -78,6 +78,30 @@ func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 	}
 }
 
+func TestSummarizeAuthorCommitsOfYesterday(t *testing.T) {
+	repo := newMock()
+	uc := NewCommitUsecase(repo)
+	expectedCs := repo.yesterdayCs[:1]
+	expected := &domain.Summary{
+		Repo: &domain.Repo{
+			Owner: "mock",
+			Name:  "mock",
+		},
+		Authors: []string{"alice"},
+		Commits: expectedCs,
+		Diff:    expectedCs.Diff(),
+		Since:   yesterday(),
+		Until:   today(),
+	}
+	actual, err := uc.SummarizeAuthorCommitsOfYesterday(expected.Repo.Owner, expected.Repo.Name, expected.Authors[0])
+	if err != nil {
+		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfYesterday", err, nil))
+	}
+	if err := assertSummary(actual, expected); err != nil {
+		t.Errorf("unexpected summary by SummarizeCommitsOfYesterday: %s\n", err)
+	}
+}
+
 func assertSummary(actual, expected *domain.Summary) error {
 	if err := assertRepo(actual.Repo, expected.Repo); err != nil {
 		return fmt.Errorf("unexpected repo of summary: %s", err)

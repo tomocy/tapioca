@@ -36,6 +36,14 @@ func (u *CommitUsecase) SummarizeAuthorCommitsOfToday(owner, repo, author string
 	})
 }
 
+func (u *CommitUsecase) SummarizeAuthorCommitsOfYesterday(owner, repo, author string) (*domain.Summary, error) {
+	return u.fetchAndSummarizeCommits(owner, repo, domain.Params{
+		Author: author,
+		Since:  yesterday(),
+		Until:  today(),
+	})
+}
+
 func (u *CommitUsecase) fetchAndSummarizeCommits(owner, repo string, params domain.Params) (*domain.Summary, error) {
 	s := &domain.Summary{
 		Repo: &domain.Repo{
