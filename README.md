@@ -1,5 +1,5 @@
 # tapioca
-a tool to summarize commits of today  
+a tool to summarize commits of today or yesterday  
 
 ## Instllation
 ```
@@ -22,6 +22,8 @@ summary of commits to tomocy/tapioca in 2019/08/12
 Usage of tapioca:
   -a string
         name of author
+  -d string
+        day of commits to be summarized (default "today") (available "today", "yesterday")
   -f string
         name of format (default "text") (available "text", "color")
   -m string
