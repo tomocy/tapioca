@@ -101,7 +101,7 @@ type Commit struct {
 }
 
 func (c Commit) String() string {
-	return fmt.Sprintf("%s: %s", c.ID, c.Diff)
+	return fmt.Sprintf("%s: %s: %s: %s", c.CreatedAt.Format("2006/01/02"), c.Author, c.ID, c.Diff)
 }
 
 type Diff struct {
