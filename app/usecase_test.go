@@ -11,7 +11,7 @@ import (
 func TestSummarizeCommitsOfToday(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
-	expectedCs := repo.cs[:len(repo.cs)-1]
+	expectedCs := repo.todayCs
 	expected := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: "mock",
@@ -34,7 +34,7 @@ func TestSummarizeCommitsOfToday(t *testing.T) {
 func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
 	repo := newMock()
 	uc := NewCommitUsecase(repo)
-	expectedCs := repo.cs[:1]
+	expectedCs := repo.todayCs[:1]
 	expected := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: "mock",
@@ -140,53 +140,53 @@ func report(name string, actual, expected interface{}) error {
 }
 
 func newMock() *mock {
-	today := today().Add(1 * time.Second)
-	return &mock{
-		cs: domain.Commits{
-			&domain.Commit{
-				ID:     "a",
-				Author: "alice",
-				Diff: &domain.Diff{
-					Changes: 3,
-					Adds:    3,
-				},
-				CreatedAt: today,
+	m := new(mock)
+	m.todayCs = mockCs(today())
+	m.cs = append(m.cs, m.todayCs...)
+	m.otherdayCs = mockCs(time.Time{})
+	m.cs = append(m.cs, m.otherdayCs...)
+
+	return m
+}
+
+func mockCs(createdIn time.Time) domain.Commits {
+	return domain.Commits{
+		&domain.Commit{
+			ID:     "a",
+			Author: "alice",
+			Diff: &domain.Diff{
+				Changes: 3,
+				Adds:    3,
 			},
-			&domain.Commit{
-				ID:     "b",
-				Author: "bob",
-				Diff: &domain.Diff{
-					Changes: 3,
-					Adds:    2,
-					Dels:    1,
-				},
-				CreatedAt: today,
+			CreatedAt: createdIn.Add(3 * time.Minute),
+		},
+		&domain.Commit{
+			ID:     "b",
+			Author: "bob",
+			Diff: &domain.Diff{
+				Changes: 3,
+				Adds:    2,
+				Dels:    1,
 			},
-			&domain.Commit{
-				ID:     "c",
-				Author: "cris",
-				Diff: &domain.Diff{
-					Changes: 3,
-					Adds:    1,
-					Dels:    2,
-				},
-				CreatedAt: today,
+			CreatedAt: createdIn.Add(2 * time.Minute),
+		},
+		&domain.Commit{
+			ID:     "c",
+			Author: "cris",
+			Diff: &domain.Diff{
+				Changes: 3,
+				Adds:    1,
+				Dels:    2,
 			},
-			&domain.Commit{
-				ID:     "d",
-				Author: "dave",
-				Diff: &domain.Diff{
-					Changes: 3,
-					Dels:    3,
-				},
-			},
+			CreatedAt: createdIn.Add(1 * time.Minute),
 		},
 	}
 }
 
 type mock struct {
-	cs   domain.Commits
-	date time.Time
+	cs         domain.Commits
+	todayCs    domain.Commits
+	otherdayCs domain.Commits
 }
 
 func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
