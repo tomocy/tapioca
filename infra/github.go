@@ -88,6 +88,9 @@ func (g *GitHub) parseParams(params domain.Params) url.Values {
 	if !params.Since.IsZero() {
 		vs.Set("since", params.Since.Format(time.RFC3339))
 	}
+	if !params.Until.IsZero() {
+		vs.Set("until", params.Until.Format(time.RFC3339))
+	}
 
 	return vs
 }
