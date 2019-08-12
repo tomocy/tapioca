@@ -195,7 +195,7 @@ func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Co
 		if params.Author != "" && c.Author != params.Author {
 			continue
 		}
-		if !c.CreatedAt.After(params.Since) {
+		if !params.Since.IsZero() && !c.CreatedAt.After(params.Since) {
 			continue
 		}
 
