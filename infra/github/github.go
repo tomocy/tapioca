@@ -85,3 +85,7 @@ func (d *Diff) Adapt() *domain.Diff {
 		Dels:    d.Deletions,
 	}
 }
+
+type Error struct {
+	Message string `json:"message"`
+}
