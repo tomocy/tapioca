@@ -8,97 +8,28 @@ import (
 	"github.com/tomocy/tapioca/domain"
 )
 
-func TestSummarizeCommitsOfToday(t *testing.T) {
+func TestSummarizeCommits(t *testing.T) {
 	repo := newMock()
-	uc := NewCommitUsecase(repo)
-	expectedCs := repo.todayCs
+	u := NewCommitUsecase(repo)
 	expected := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: "mock",
 			Name:  "mock",
 		},
 		Authors: []string{"alice", "bob", "cris"},
-		Commits: expectedCs,
-		Diff:    expectedCs.Diff(),
+		Commits: repo.todayCs,
+		Diff:    repo.todayCs.Diff(),
 		Since:   today(),
 	}
-	actual, err := uc.SummarizeCommitsOfToday(expected.Repo.Owner, expected.Repo.Name)
-	if err != nil {
-		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
-	}
-	if err := assertSummary(actual, expected); err != nil {
-		t.Errorf("unexpected summary by SummarizeCommitsOfToday: %s\n", err)
-	}
-}
 
-func TestSummarizeCommitsOfYesterday(t *testing.T) {
-	repo := newMock()
-	uc := NewCommitUsecase(repo)
-	expectedCs := repo.yesterdayCs
-	expected := &domain.Summary{
-		Repo: &domain.Repo{
-			Owner: "mock",
-			Name:  "mock",
-		},
-		Authors: []string{"alice", "bob", "cris"},
-		Commits: expectedCs,
-		Diff:    expectedCs.Diff(),
-		Since:   yesterday(),
-		Until:   today(),
-	}
-	actual, err := uc.SummarizeCommitsOfYesterday(expected.Repo.Owner, expected.Repo.Name)
+	actual, err := u.SummarizeCommits(expected.Repo.Owner, expected.Repo.Name, domain.Params{
+		Since: expected.Since,
+	})
 	if err != nil {
-		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfYesterday", err, nil))
+		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommits", err, nil))
 	}
 	if err := assertSummary(actual, expected); err != nil {
-		t.Errorf("unexpected summary by SummarizeCommitsOfYesterday: %s\n", err)
-	}
-}
-
-func TestSummarizeAuthorCommitsOfToday(t *testing.T) {
-	repo := newMock()
-	uc := NewCommitUsecase(repo)
-	expectedCs := repo.todayCs[:1]
-	expected := &domain.Summary{
-		Repo: &domain.Repo{
-			Owner: "mock",
-			Name:  "mock",
-		},
-		Authors: []string{"alice"},
-		Commits: expectedCs,
-		Diff:    expectedCs.Diff(),
-		Since:   today(),
-	}
-	actual, err := uc.SummarizeAuthorCommitsOfToday(expected.Repo.Owner, expected.Repo.Name, expected.Authors[0])
-	if err != nil {
-		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfToday", err, nil))
-	}
-	if err := assertSummary(actual, expected); err != nil {
-		t.Errorf("unexpected summary by SummarizeCommitsOfToday: %s\n", err)
-	}
-}
-
-func TestSummarizeAuthorCommitsOfYesterday(t *testing.T) {
-	repo := newMock()
-	uc := NewCommitUsecase(repo)
-	expectedCs := repo.yesterdayCs[:1]
-	expected := &domain.Summary{
-		Repo: &domain.Repo{
-			Owner: "mock",
-			Name:  "mock",
-		},
-		Authors: []string{"alice"},
-		Commits: expectedCs,
-		Diff:    expectedCs.Diff(),
-		Since:   yesterday(),
-		Until:   today(),
-	}
-	actual, err := uc.SummarizeAuthorCommitsOfYesterday(expected.Repo.Owner, expected.Repo.Name, expected.Authors[0])
-	if err != nil {
-		t.Fatalf("%s\n", reportUnexpected("error by SummarizeCommitsOfYesterday", err, nil))
-	}
-	if err := assertSummary(actual, expected); err != nil {
-		t.Errorf("unexpected summary by SummarizeCommitsOfYesterday: %s\n", err)
+		t.Errorf("unexpected summary by SummarizeCommits: %s\n", err)
 	}
 }
 

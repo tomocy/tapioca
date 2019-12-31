@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/tomocy/tapioca/app"
 	"github.com/tomocy/tapioca/domain"
@@ -47,13 +48,12 @@ func (c *Client) Run() error {
 }
 
 func (c *Client) summarize() (*domain.Summary, error) {
-	var s *domain.Summary
-	var err error
-	if c.cnf.author != "" {
-		s, err = summarizeAuthorCommits(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.author, c.cnf.day)
-	} else {
-		s, err = summarizeCommits(c.cnf.repo.owner, c.cnf.repo.name, c.cnf.day)
-	}
+	u := newCommitUsecase()
+	s, err := u.SummarizeCommits(c.cnf.repo.owner, c.cnf.repo.name, domain.Params{
+		Author: c.cnf.author,
+		Since:  c.cnf.since,
+		Until:  c.cnf.until,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +71,15 @@ func parseConfig() (*config, error) {
 
 	cnf := &config{
 		mode: *m, format: *f,
-		day: *d, author: *a,
+		author: *a,
 	}
+
+	if *d == dayToday {
+		cnf.since = today()
+	} else if *d == dayYesterday {
+		cnf.since, cnf.until = yesterday(), today()
+	}
+
 	if err := cnf.parseRepo(*r); err != nil {
 		return nil, err
 	}
@@ -80,12 +87,21 @@ func parseConfig() (*config, error) {
 	return cnf, nil
 }
 
+func yesterday() time.Time {
+	return today().Add(-24 * time.Hour)
+}
+
+func today() time.Time {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+}
+
 type config struct {
-	mode   string
-	format string
-	day    string
-	repo   repo
-	author string
+	mode         string
+	format       string
+	since, until time.Time
+	repo         repo
+	author       string
 }
 
 func (c *config) parseRepo(r string) error {
@@ -159,44 +175,6 @@ func (h *Help) Run() error {
 
 func (h *Help) ShowSummary(domain.Summary) {
 	flag.Usage()
-}
-
-func summarizeCommits(owner, repo, day string) (*domain.Summary, error) {
-	uc := newCommitUsecase()
-	var summarize func(string, string) (*domain.Summary, error)
-	var report func(error) error
-	if day == dayToday {
-		summarize = uc.SummarizeCommitsOfToday
-		report = reportFunc("summarize commits of today")
-	} else {
-		summarize = uc.SummarizeCommitsOfYesterday
-		report = reportFunc("summarize commits of yesterday")
-	}
-	s, err := summarize(owner, repo)
-	if err != nil {
-		return nil, report(err)
-	}
-
-	return s, nil
-}
-
-func summarizeAuthorCommits(owner, repo, author, day string) (*domain.Summary, error) {
-	uc := newCommitUsecase()
-	var summarize func(string, string, string) (*domain.Summary, error)
-	var report func(error) error
-	if day == dayToday {
-		summarize = uc.SummarizeAuthorCommitsOfToday
-		report = reportFunc("summarize author commits of today")
-	} else {
-		summarize = uc.SummarizeAuthorCommitsOfYesterday
-		report = reportFunc("summarize author commits of yesterday")
-	}
-	s, err := summarize(owner, repo, author)
-	if err != nil {
-		return nil, report(err)
-	}
-
-	return s, nil
 }
 
 func newCommitUsecase() *app.CommitUsecase {
