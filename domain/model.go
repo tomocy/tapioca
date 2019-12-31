@@ -39,7 +39,7 @@ func (cs Commits) Authors() []string {
 
 func (cs Commits) Diff() *Diff {
 	diff := new(Diff)
-	diff.marge(cs.diffs()...)
+	diff.Marge(cs.diffs()...)
 
 	return diff
 }
@@ -64,7 +64,7 @@ type Diff struct {
 	Changes, Adds, Dels int
 }
 
-func (d *Diff) marge(ts ...*Diff) {
+func (d *Diff) Marge(ts ...*Diff) {
 	for _, t := range ts {
 		d.Changes += t.Changes
 		d.Adds += t.Adds

@@ -30,9 +30,7 @@ func (c *OfRepos) Run(ctx context.Context) error {
 		return err
 	}
 
-	for _, s := range ss {
-		c.presenter.PresentSummary(*s)
-	}
+	c.presenter.PresentSummaries(ss...)
 
 	return nil
 }
@@ -66,7 +64,7 @@ func (c *OfRepo) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to summarize: %s", err)
 	}
 
-	c.presenter.PresentSummary(*s)
+	c.presenter.PresentSummaries(s)
 
 	return nil
 }
@@ -91,5 +89,5 @@ func newCommitUsecase() *app.CommitUsecase {
 var githubRepo = infra.NewGitHub()
 
 type Presenter interface {
-	PresentSummary(domain.Summary)
+	PresentSummaries(...*domain.Summary)
 }
