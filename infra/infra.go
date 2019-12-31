@@ -75,9 +75,9 @@ func writeJSON(dest io.Writer, src interface{}) error {
 }
 
 type config struct {
-	GitHub githubConfig
+	GitHub oauth2Config
 }
 
-type githubConfig struct {
+type oauth2Config struct {
 	AccessToken *oauth2.Token
 }

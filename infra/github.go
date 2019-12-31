@@ -14,15 +14,13 @@ import (
 	"golang.org/x/oauth2/github"
 )
 
-const (
-	authorizationRedirectPath = "/tapioca/authorization"
-)
+const authorizationRedirectPath = "/tapioca/authorization"
 
 func NewGitHub() *GitHub {
 	createWorkspace()
 	return &GitHub{
-		oauth: oauth{
-			cnf: oauth2.Config{
+		client: oauth2Client{
+			conf: oauth2.Config{
 				ClientID:     "5a24485cf2fe2ca8fab4",
 				ClientSecret: "63a169863256d15eca02ac6ade415f93b2692e28",
 				RedirectURL:  "http://localhost/tapioca/authorization",
@@ -36,12 +34,12 @@ func NewGitHub() *GitHub {
 }
 
 type GitHub struct {
-	oauth oauth
+	client oauth2Client
 }
 
-type oauth struct {
+type oauth2Client struct {
 	state string
-	cnf   oauth2.Config
+	conf  oauth2.Config
 }
 
 func (g *GitHub) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
@@ -108,7 +106,7 @@ func (g *GitHub) FetchCommit(owner, repo, id string) (*domain.Commit, error) {
 	return c.Adapt(), nil
 }
 
-func (g *GitHub) fetch(destURL string, params url.Values, dest interface{}) error {
+func (g *GitHub) fetch(dstURI string, params url.Values, dst interface{}) error {
 	tok, err := g.retieveAuthorization()
 	if err != nil {
 		return err
@@ -117,31 +115,31 @@ func (g *GitHub) fetch(destURL string, params url.Values, dest interface{}) erro
 	if err := g.do(&oauthReq{
 		tok:    tok,
 		method: http.MethodGet,
-		dest:   destURL,
+		uri:    dstURI,
 		params: params,
-	}, dest); err != nil {
+	}, dst); err != nil {
 		return err
 	}
 
-	return g.saveConfig(githubConfig{
+	return g.saveConfig(oauth2Config{
 		AccessToken: tok,
 	})
 }
 
-func (g *GitHub) saveConfig(cnf githubConfig) error {
+func (g *GitHub) saveConfig(conf oauth2Config) error {
 	if loaded, err := loadConfig(); err == nil {
-		loaded.GitHub = cnf
+		loaded.GitHub = conf
 		return saveConfig(loaded)
 	}
 
 	return saveConfig(&config{
-		GitHub: cnf,
+		GitHub: conf,
 	})
 }
 
 func (g *GitHub) retieveAuthorization() (*oauth2.Token, error) {
-	if cnf, err := loadConfig(); err == nil {
-		return cnf.GitHub.AccessToken, nil
+	if conf, err := loadConfig(); err == nil {
+		return conf.GitHub.AccessToken, nil
 	}
 
 	url := g.oauthCodeURL()
@@ -152,11 +150,11 @@ func (g *GitHub) retieveAuthorization() (*oauth2.Token, error) {
 
 func (g *GitHub) oauthCodeURL() string {
 	g.setRandomState()
-	return g.oauth.cnf.AuthCodeURL(g.oauth.state)
+	return g.client.conf.AuthCodeURL(g.client.state)
 }
 
 func (g *GitHub) setRandomState() {
-	g.oauth.state = fmt.Sprintf("%d", rand.Intn(10000))
+	g.client.state = fmt.Sprintf("%d", rand.Intn(10000))
 }
 
 func (g *GitHub) handleAuthorizationRedirect() (*oauth2.Token, error) {
@@ -197,7 +195,7 @@ func (g *GitHub) handlerForAuthorizationRedirect(tokCh chan<- *oauth2.Token, err
 			return
 		}
 
-		tok, err := g.oauth.cnf.Exchange(oauth2.NoContext, code)
+		tok, err := g.client.conf.Exchange(oauth2.NoContext, code)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			errCh <- err
@@ -209,8 +207,8 @@ func (g *GitHub) handlerForAuthorizationRedirect(tokCh chan<- *oauth2.Token, err
 }
 
 func (g *GitHub) checkState(state string) error {
-	stored := g.oauth.state
-	g.oauth.state = ""
+	stored := g.client.state
+	g.client.state = ""
 	if state != stored {
 		return errors.New("invalid state")
 	}
@@ -218,30 +216,30 @@ func (g *GitHub) checkState(state string) error {
 	return nil
 }
 
-func (g *GitHub) do(r *oauthReq, dest interface{}) error {
-	resp, err := r.do(g.oauth.cnf)
+func (g *GitHub) do(r *oauthReq, dst interface{}) error {
+	resp, err := r.do(g.client.conf)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	return readJSON(resp.Body, dest)
+	return readJSON(resp.Body, dst)
 }
 
 type oauthReq struct {
 	tok    *oauth2.Token
 	method string
-	dest   string
+	uri    string
 	params url.Values
 }
 
-func (r *oauthReq) do(cnf oauth2.Config) (*http.Response, error) {
-	client := cnf.Client(oauth2.NoContext, r.tok)
+func (r *oauthReq) do(conf oauth2.Config) (*http.Response, error) {
+	client := conf.Client(oauth2.NoContext, r.tok)
 	if r.method != http.MethodGet {
-		return client.PostForm(r.dest, r.params)
+		return client.PostForm(r.uri, r.params)
 	}
 
-	parsed, err := url.Parse(r.dest)
+	parsed, err := url.Parse(r.uri)
 	if err != nil {
 		return nil, err
 	}
