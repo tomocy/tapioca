@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/tomocy/tapioca/app"
-	"github.com/tomocy/tapioca/cmd/tapioca/client"
 	"github.com/tomocy/tapioca/domain"
 	"github.com/tomocy/tapioca/infra"
 )
@@ -18,6 +17,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to run: %s\n", err)
 		os.Exit(1)
 	}
+}
+
+type client interface {
+	Run() error
 }
 
 type ofRepo struct {
