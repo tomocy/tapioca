@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/tomocy/tapioca/cmd/tapioca/client"
+	"github.com/tomocy/tapioca/domain"
 )
 
 func main() {
@@ -20,4 +21,8 @@ type config struct {
 	owner        string
 	repo         string
 	since, until time.Time
+}
+
+type presenter interface {
+	PresentSummary(domain.Summary)
 }
