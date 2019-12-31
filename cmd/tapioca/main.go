@@ -109,6 +109,10 @@ type presenter interface {
 	PresentSummary(domain.Summary)
 }
 
+type printer interface {
+	PrintSummary(io.Writer, domain.Summary)
+}
+
 type text struct {
 	colorized bool
 }
