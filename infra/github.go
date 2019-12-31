@@ -42,6 +42,19 @@ type oauth2Client struct {
 	conf  oauth2.Config
 }
 
+func (g *GitHub) FetchRepos(_ string) ([]*domain.Repo, error) {
+	var rs infragithub.Repos
+	if err := g.fetch(
+		fmt.Sprintf("https://api.github.com/user/repos"),
+		nil,
+		&rs,
+	); err != nil {
+		return nil, err
+	}
+
+	return rs.Adapt(), nil
+}
+
 func (g *GitHub) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
 	ids, err := g.fetchCommitIDs(owner, repo, params)
 	if err != nil {

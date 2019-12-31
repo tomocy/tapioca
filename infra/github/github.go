@@ -6,6 +6,31 @@ import (
 	"github.com/tomocy/tapioca/domain"
 )
 
+type Repos []*Repo
+
+func (rs Repos) Adapt() []*domain.Repo {
+	adapteds := make([]*domain.Repo, len(rs))
+	for i, r := range rs {
+		adapteds[i] = r.Adapt()
+	}
+
+	return adapteds
+}
+
+type Repo struct {
+	Name  string `json:"name"`
+	Owner struct {
+		Login string `json:"login"`
+	} `json:"owner"`
+}
+
+func (r *Repo) Adapt() *domain.Repo {
+	return &domain.Repo{
+		Owner: r.Owner.Login,
+		Name:  r.Name,
+	}
+}
+
 type Commits []*Commit
 
 func (cs Commits) Adapt() []*domain.Commit {
