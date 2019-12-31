@@ -2,8 +2,8 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/tomocy/tapioca/domain"
@@ -27,17 +27,29 @@ func (u *RepoUsecase) SummarizeCommits(ctx context.Context, owner string, params
 		return nil, fmt.Errorf("failed to fetch repos: %s", err)
 	}
 
-	ss := make([]*domain.Summary, 0, len(repos))
-	for _, repo := range repos {
-		s, err := u.commit.SummarizeCommits(ctx, repo.Owner, repo.Name, params)
-		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				break
-			}
+	ch := make(chan *domain.Summary)
+	go func() {
+		defer close(ch)
 
-			continue
+		var wg sync.WaitGroup
+		for _, repo := range repos {
+			wg.Add(1)
+			go func(repo *domain.Repo) {
+				defer wg.Done()
+				s, err := u.commit.SummarizeCommits(ctx, repo.Owner, repo.Name, params)
+				if err != nil {
+					return
+				}
+
+				ch <- s
+			}(repo)
 		}
 
+		wg.Wait()
+	}()
+
+	ss := make([]*domain.Summary, 0, len(repos))
+	for s := range ch {
 		ss = append(ss, s)
 	}
 
