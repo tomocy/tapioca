@@ -23,7 +23,7 @@ func newClient() client {
 	conf := parseConfig()
 
 	return clientPkg.NewOfRepo(
-		conf.owner, conf.repo,
+		conf.owner, conf.repo, conf.author,
 		conf.since, conf.until,
 		&presenter.Stdout{
 			Printer: &printer.InText{

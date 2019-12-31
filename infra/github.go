@@ -25,7 +25,7 @@ func NewGitHub() *GitHub {
 				ClientSecret: "63a169863256d15eca02ac6ade415f93b2692e28",
 				RedirectURL:  "http://localhost/tapioca/authorization",
 				Scopes: []string{
-					"repo:status", "read:user",
+					"read:repo", "read:user",
 				},
 				Endpoint: github.Endpoint,
 			},

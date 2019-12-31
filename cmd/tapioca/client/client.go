@@ -9,18 +9,18 @@ import (
 	"github.com/tomocy/tapioca/infra"
 )
 
-func NewOfRepo(owner, repo string, since, until time.Time, presenter Presenter) *OfRepo {
+func NewOfRepo(owner, repo, author string, since, until time.Time, presenter Presenter) *OfRepo {
 	return &OfRepo{
-		owner: owner, repo: repo,
+		owner: owner, repo: repo, author: author,
 		since: since, until: until,
 		presenter: presenter,
 	}
 }
 
 type OfRepo struct {
-	owner, repo  string
-	since, until time.Time
-	presenter    Presenter
+	owner, repo, author string
+	since, until        time.Time
+	presenter           Presenter
 }
 
 func (c *OfRepo) Run() error {
@@ -37,8 +37,9 @@ func (c *OfRepo) Run() error {
 func (c *OfRepo) summarize() (*domain.Summary, error) {
 	u := newCommitUsecase()
 	return u.SummarizeCommits(c.owner, c.repo, domain.Params{
-		Since: c.since,
-		Until: c.until,
+		Author: c.author,
+		Since:  c.since,
+		Until:  c.until,
 	})
 }
 
