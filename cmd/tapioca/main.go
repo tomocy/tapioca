@@ -15,10 +15,22 @@ import (
 )
 
 func main() {
-	c := client.New()
+	c := newClient()
 	if err := c.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to run: %s\n", err)
 		os.Exit(1)
+	}
+}
+
+func newClient() client {
+	conf := parseConfig()
+	return &ofRepo{
+		conf: conf,
+		presenter: &stdout{
+			printer: &text{
+				colorized: conf.colorized,
+			},
+		},
 	}
 }
 
