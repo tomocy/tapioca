@@ -17,6 +17,7 @@ func (p *Stdout) PresentSummaries(ss ...*domain.Summary) {
 	}
 	if len(ss) == 1 {
 		p.Printer.PrintSummary(os.Stdout, ss[0])
+		return
 	}
 
 	p.Printer.PrintSummaries(os.Stdout, ss)
