@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -22,7 +23,7 @@ func TestSummarizeCommits(t *testing.T) {
 		Since:   today(),
 	}
 
-	actual, err := u.SummarizeCommits(expected.Repo.Owner, expected.Repo.Name, domain.Params{
+	actual, err := u.SummarizeCommits(context.Background(), expected.Repo.Owner, expected.Repo.Name, domain.Params{
 		Since: expected.Since,
 	})
 	if err != nil {
@@ -174,7 +175,7 @@ func (m *mock) mockAndSetCs(createdIn time.Time, dest *domain.Commits) {
 	m.cs = append(m.cs, cs...)
 }
 
-func (m *mock) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
+func (m *mock) FetchCommits(_ context.Context, owner, repo string, params domain.Params) (domain.Commits, error) {
 	var fetcheds domain.Commits
 	for _, c := range m.cs {
 		if params.Author != "" && c.Author != params.Author {
