@@ -18,8 +18,13 @@ func main() {
 	conf := parseConfig()
 	c := newClient(conf)
 
-	ctx, cancel := context.WithTimeout(context.Background(), conf.timeout)
-	defer cancel()
+	ctx := context.Background()
+	if conf.timeout != 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, conf.timeout)
+		defer cancel()
+	}
+
 	ctx = contextWithSignals(ctx, syscall.SIGINT)
 
 	if err := c.Run(ctx); err != nil {
@@ -38,7 +43,7 @@ func parseConfig() config {
 
 	colorized := flag.Bool("color", false, "colorize the output if true")
 
-	timeout := flag.Duration("timeout", time.Minute, "timeout")
+	timeout := flag.Duration("timeout", 0, "timeout")
 
 	flag.Parse()
 
