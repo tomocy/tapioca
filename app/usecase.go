@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -30,7 +31,11 @@ func (u *RepoUsecase) SummarizeCommits(ctx context.Context, owner string, params
 	for _, repo := range repos {
 		s, err := u.commit.SummarizeCommits(ctx, repo.Owner, repo.Name, params)
 		if err != nil {
-			return nil, err
+			if errors.Is(err, context.Canceled) {
+				break
+			}
+
+			continue
 		}
 
 		ss = append(ss, s)
