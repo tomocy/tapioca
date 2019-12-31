@@ -22,6 +22,18 @@ func main() {
 func newClient() client {
 	conf := parseConfig()
 
+	if conf.owner != "" && conf.repo == "" {
+		return clientPkg.NewOfRepos(
+			conf.owner, conf.author,
+			conf.since, conf.until,
+			&presenter.Stdout{
+				Printer: &printer.InText{
+					Colorized: conf.colorized,
+				},
+			},
+		)
+	}
+
 	return clientPkg.NewOfRepo(
 		conf.owner, conf.repo, conf.author,
 		conf.since, conf.until,
