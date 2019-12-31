@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -15,6 +16,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to run: %s\n", err)
 		os.Exit(1)
 	}
+}
+
+type help struct {
+	err error
+}
+
+func (h help) Run() error {
+	flag.Usage()
+	return h.err
 }
 
 type config struct {
