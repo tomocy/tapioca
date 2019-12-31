@@ -46,17 +46,31 @@ type oauth2Client struct {
 }
 
 func (g *GitHub) FetchRepos(ctx context.Context, _ string) ([]*domain.Repo, error) {
-	var rs infragithub.Repos
-	if err := g.fetch(
-		ctx,
-		fmt.Sprintf("https://api.github.com/user/repos"),
-		nil,
-		&rs,
-	); err != nil {
-		return nil, err
+	params := url.Values{
+		"per_page": []string{"100"},
 	}
 
-	return rs.Adapt(), nil
+	fetcheds := make(infragithub.Repos, 0, 100)
+	for i := 1; ; i++ {
+		params.Set("page", fmt.Sprint(i))
+
+		var rs infragithub.Repos
+		if err := g.fetch(
+			ctx,
+			fmt.Sprintf("https://api.github.com/user/repos"),
+			params,
+			&rs,
+		); err != nil {
+			return nil, err
+		}
+		if len(rs) < 1 {
+			break
+		}
+
+		fetcheds = append(fetcheds, rs...)
+	}
+
+	return fetcheds.Adapt(), nil
 }
 
 func (g *GitHub) FetchCommits(ctx context.Context, owner, repo string, params domain.Params) (domain.Commits, error) {
@@ -83,18 +97,31 @@ func (g *GitHub) FetchCommits(ctx context.Context, owner, repo string, params do
 }
 
 func (g *GitHub) fetchCommitIDs(ctx context.Context, owner, repo string, params domain.Params) ([]string, error) {
-	var cs infragithub.Commits
-	if err := g.fetch(
-		ctx,
-		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
-		g.parseParams(params),
-		&cs,
-	); err != nil {
-		return nil, err
+	parsed := g.parseParams(params)
+	parsed.Add("per_page", "100")
+
+	fetcheds := make(infragithub.Commits, 0, 100)
+	for i := 1; ; i++ {
+		parsed.Set("page", fmt.Sprint(i))
+
+		var cs infragithub.Commits
+		if err := g.fetch(
+			ctx,
+			fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
+			parsed,
+			&cs,
+		); err != nil {
+			return nil, err
+		}
+		if len(cs) < 1 {
+			break
+		}
+
+		fetcheds = append(fetcheds, cs...)
 	}
 
-	ids := make([]string, len(cs))
-	for i, c := range cs {
+	ids := make([]string, len(fetcheds))
+	for i, c := range fetcheds {
 		ids[i] = c.SHA
 	}
 
