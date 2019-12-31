@@ -248,7 +248,9 @@ func (g *GitHub) do(ctx context.Context, r *oauthReq, dst interface{}) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
+		var err infragithub.Error
+		readJSON(resp.Body, &err)
+		return fmt.Errorf("%s: %s", resp.Status, err.Message)
 	}
 
 	return readJSON(resp.Body, dst)
