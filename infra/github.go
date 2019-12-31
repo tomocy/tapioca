@@ -236,6 +236,10 @@ func (g *GitHub) do(r *oauthReq, dst interface{}) error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+
 	return readJSON(resp.Body, dst)
 }
 
