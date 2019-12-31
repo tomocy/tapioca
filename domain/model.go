@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"sort"
 	"time"
 )
@@ -14,41 +13,8 @@ type Summary struct {
 	Since, Until time.Time
 }
 
-func (s Summary) String() string {
-	su := sinceUntil{
-		since: s.Since,
-		until: s.Until,
-	}
-	return fmt.Sprintf(
-		"summary of commits to %s in %s\n%d commits\n%s",
-		s.Repo, su.Format("2006/01/02"),
-		len(s.Commits),
-		s.Diff,
-	)
-}
-
-type sinceUntil struct {
-	since, until time.Time
-}
-
-func (su sinceUntil) Format(format string) string {
-	if !su.since.IsZero() && !su.until.IsZero() {
-		return fmt.Sprintf("from %s to %s", su.since.Format(format), su.until.Format(format))
-	}
-
-	if !su.since.IsZero() {
-		return fmt.Sprintf("since %s", su.since.Format(format))
-	}
-
-	return fmt.Sprintf("until %s", su.until.Format(format))
-}
-
 type Repo struct {
 	Owner, Name string
-}
-
-func (r Repo) String() string {
-	return fmt.Sprintf("%s/%s", r.Owner, r.Name)
 }
 
 type Commits []*Commit
@@ -94,16 +60,8 @@ type Commit struct {
 	CreatedAt time.Time
 }
 
-func (c Commit) String() string {
-	return fmt.Sprintf("%s: %s: %s: %s", c.CreatedAt.Format("2006/01/02"), c.Author, c.ID, c.Diff)
-}
-
 type Diff struct {
 	Changes, Adds, Dels int
-}
-
-func (d Diff) String() string {
-	return fmt.Sprintf("%d changes: %d adds, %d dels", d.Changes, d.Adds, d.Dels)
 }
 
 func (d *Diff) marge(ts ...*Diff) {
