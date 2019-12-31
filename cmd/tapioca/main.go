@@ -109,6 +109,14 @@ type presenter interface {
 	PresentSummary(domain.Summary)
 }
 
+type stdout struct {
+	printer printer
+}
+
+func (p *stdout) PresentSummary(s domain.Summary) {
+	p.printer.PrintSummary(os.Stdout, s)
+}
+
 type printer interface {
 	PrintSummary(io.Writer, domain.Summary)
 }
