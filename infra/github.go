@@ -65,13 +65,18 @@ func (g *GitHub) FetchCommits(ctx context.Context, owner, repo string, params do
 		return nil, err
 	}
 
-	cs := make(domain.Commits, len(ids))
-	for i, id := range ids {
+	cs := make(domain.Commits, 0, len(ids))
+	for _, id := range ids {
 		c, err := g.FetchCommit(ctx, owner, repo, id)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				break
+			}
+
 			return nil, err
 		}
-		cs[i] = c
+
+		cs = append(cs, c)
 	}
 
 	return cs, nil
