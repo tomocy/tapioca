@@ -9,6 +9,20 @@ import (
 	"github.com/tomocy/tapioca/infra"
 )
 
+func NewOfRepos(owner, author string, since, until time.Time, presenter Presenter) *OfRepos {
+	return &OfRepos{
+		owner: owner, author: author,
+		since: since, until: until,
+		presenter: presenter,
+	}
+}
+
+type OfRepos struct {
+	owner, author string
+	since, until  time.Time
+	presenter     Presenter
+}
+
 func NewOfRepo(owner, repo, author string, since, until time.Time, presenter Presenter) *OfRepo {
 	return &OfRepo{
 		owner: owner, repo: repo, author: author,

@@ -1,10 +1,42 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/tomocy/tapioca/domain"
 )
+
+func NewRepoUsecase(repo domain.RepoRepo, commit *CommitUsecase) *RepoUsecase {
+	return &RepoUsecase{
+		repo:   repo,
+		commit: commit,
+	}
+}
+
+type RepoUsecase struct {
+	repo   domain.RepoRepo
+	commit *CommitUsecase
+}
+
+func (u *RepoUsecase) SummarizeCommits(owner string, params domain.Params) ([]*domain.Summary, error) {
+	repos, err := u.repo.FetchRepos(owner)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch repos: %s", err)
+	}
+
+	ss := make([]*domain.Summary, 0, len(repos))
+	for _, repo := range repos {
+		s, err := u.commit.SummarizeCommits(repo.Owner, repo.Name, params)
+		if err != nil {
+			return nil, err
+		}
+
+		ss = append(ss, s)
+	}
+
+	return ss, nil
+}
 
 func NewCommitUsecase(repo domain.CommitRepo) *CommitUsecase {
 	return &CommitUsecase{
