@@ -3,7 +3,6 @@ package domain
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -21,8 +20,10 @@ func (s Summary) String() string {
 		until: s.Until,
 	}
 	return fmt.Sprintf(
-		"summary of commits to %s in %s\n%s",
-		s.Repo, su.Format("2006/01/02"), s.Diff,
+		"summary of commits to %s in %s\n%d commits\n%s",
+		s.Repo, su.Format("2006/01/02"),
+		len(s.Commits),
+		s.Diff,
 	)
 }
 
@@ -31,22 +32,15 @@ type sinceUntil struct {
 }
 
 func (su sinceUntil) Format(format string) string {
-	if su.until.Sub(su.since) <= 24*time.Hour {
-		return su.since.Format(format)
+	if !su.since.IsZero() && !su.until.IsZero() {
+		return fmt.Sprintf("from %s to %s", su.since.Format(format), su.until.Format(format))
 	}
 
-	var b strings.Builder
 	if !su.since.IsZero() {
-		fmt.Fprintf(&b, "since %s", su.since.Format(format))
-	}
-	if !su.until.IsZero() {
-		if b.String() != "" {
-			fmt.Fprint(&b, " ")
-		}
-		fmt.Fprintf(&b, "until %s", su.until.Format(format))
+		return fmt.Sprintf("since %s", su.since.Format(format))
 	}
 
-	return b.String()
+	return fmt.Sprintf("until %s", su.until.Format(format))
 }
 
 type Repo struct {
