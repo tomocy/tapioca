@@ -18,7 +18,9 @@ func main() {
 	conf := parseConfig()
 	c := newClient(conf)
 
-	ctx := contextWithSignals(context.Background(), syscall.SIGINT)
+	ctx, cancel := context.WithTimeout(context.Background(), conf.timeout)
+	defer cancel()
+	ctx = contextWithSignals(ctx, syscall.SIGINT)
 
 	if err := c.Run(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to run: %s\n", err)
@@ -36,6 +38,8 @@ func parseConfig() config {
 
 	colorized := flag.Bool("color", false, "colorize the output if true")
 
+	timeout := flag.Duration("timeout", time.Minute, "timeout")
+
 	flag.Parse()
 
 	return config{
@@ -43,6 +47,7 @@ func parseConfig() config {
 		author: *author,
 		since:  time.Time(since), until: time.Time(until),
 		colorized: *colorized,
+		timeout:   *timeout,
 	}
 }
 
@@ -93,6 +98,8 @@ type config struct {
 	author       string
 	since, until time.Time
 	colorized    bool
+
+	timeout time.Duration
 }
 
 type client interface {
