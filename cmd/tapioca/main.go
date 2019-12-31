@@ -39,6 +39,7 @@ type client interface {
 
 func parseConfig() config {
 	owner, repo := flag.String("owner", "", "name of owner"), flag.String("repo", "", "name of repo")
+	author := flag.String("author", "", "name or email address of author whose commits are summarized")
 
 	var since, until parseableTime
 	flag.Var(&since, "since", "the day since which commits are summarized")
@@ -50,7 +51,8 @@ func parseConfig() config {
 
 	return config{
 		owner: *owner, repo: *repo,
-		since: time.Time(since), until: time.Time(until),
+		author: *author,
+		since:  time.Time(since), until: time.Time(until),
 		colorized: *colorized,
 	}
 }
@@ -75,6 +77,7 @@ func (t parseableTime) String() string {
 type config struct {
 	owner        string
 	repo         string
+	author       string
 	since, until time.Time
 	colorized    bool
 }
