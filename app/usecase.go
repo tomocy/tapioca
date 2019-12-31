@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -19,15 +20,15 @@ type RepoUsecase struct {
 	commit *CommitUsecase
 }
 
-func (u *RepoUsecase) SummarizeCommits(owner string, params domain.Params) ([]*domain.Summary, error) {
-	repos, err := u.repo.FetchRepos(owner)
+func (u *RepoUsecase) SummarizeCommits(ctx context.Context, owner string, params domain.Params) ([]*domain.Summary, error) {
+	repos, err := u.repo.FetchRepos(ctx, owner)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch repos: %s", err)
 	}
 
 	ss := make([]*domain.Summary, 0, len(repos))
 	for _, repo := range repos {
-		s, err := u.commit.SummarizeCommits(repo.Owner, repo.Name, params)
+		s, err := u.commit.SummarizeCommits(ctx, repo.Owner, repo.Name, params)
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +49,7 @@ type CommitUsecase struct {
 	repo domain.CommitRepo
 }
 
-func (u *CommitUsecase) SummarizeCommits(owner, repo string, params domain.Params) (*domain.Summary, error) {
+func (u *CommitUsecase) SummarizeCommits(ctx context.Context, owner, repo string, params domain.Params) (*domain.Summary, error) {
 	s := &domain.Summary{
 		Repo: &domain.Repo{
 			Owner: owner,
@@ -57,7 +58,7 @@ func (u *CommitUsecase) SummarizeCommits(owner, repo string, params domain.Param
 		Since: params.Since,
 		Until: params.Until,
 	}
-	cs, err := u.repo.FetchCommits(owner, repo, params)
+	cs, err := u.repo.FetchCommits(ctx, owner, repo, params)
 	if err != nil {
 		return nil, err
 	}

@@ -1,11 +1,14 @@
 package infra
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/tomocy/tapioca/domain"
@@ -42,9 +45,10 @@ type oauth2Client struct {
 	conf  oauth2.Config
 }
 
-func (g *GitHub) FetchRepos(_ string) ([]*domain.Repo, error) {
+func (g *GitHub) FetchRepos(ctx context.Context, _ string) ([]*domain.Repo, error) {
 	var rs infragithub.Repos
 	if err := g.fetch(
+		ctx,
 		fmt.Sprintf("https://api.github.com/user/repos"),
 		nil,
 		&rs,
@@ -55,15 +59,15 @@ func (g *GitHub) FetchRepos(_ string) ([]*domain.Repo, error) {
 	return rs.Adapt(), nil
 }
 
-func (g *GitHub) FetchCommits(owner, repo string, params domain.Params) (domain.Commits, error) {
-	ids, err := g.fetchCommitIDs(owner, repo, params)
+func (g *GitHub) FetchCommits(ctx context.Context, owner, repo string, params domain.Params) (domain.Commits, error) {
+	ids, err := g.fetchCommitIDs(ctx, owner, repo, params)
 	if err != nil {
 		return nil, err
 	}
 
 	cs := make(domain.Commits, len(ids))
 	for i, id := range ids {
-		c, err := g.FetchCommit(owner, repo, id)
+		c, err := g.FetchCommit(ctx, owner, repo, id)
 		if err != nil {
 			return nil, err
 		}
@@ -73,9 +77,10 @@ func (g *GitHub) FetchCommits(owner, repo string, params domain.Params) (domain.
 	return cs, nil
 }
 
-func (g *GitHub) fetchCommitIDs(owner, repo string, params domain.Params) ([]string, error) {
+func (g *GitHub) fetchCommitIDs(ctx context.Context, owner, repo string, params domain.Params) ([]string, error) {
 	var cs infragithub.Commits
 	if err := g.fetch(
+		ctx,
 		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits", owner, repo),
 		g.parseParams(params),
 		&cs,
@@ -106,9 +111,10 @@ func (g *GitHub) parseParams(params domain.Params) url.Values {
 	return vs
 }
 
-func (g *GitHub) FetchCommit(owner, repo, id string) (*domain.Commit, error) {
+func (g *GitHub) FetchCommit(ctx context.Context, owner, repo, id string) (*domain.Commit, error) {
 	var c infragithub.Commit
 	if err := g.fetch(
+		ctx,
 		fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", owner, repo, id),
 		nil,
 		&c,
@@ -119,13 +125,13 @@ func (g *GitHub) FetchCommit(owner, repo, id string) (*domain.Commit, error) {
 	return c.Adapt(), nil
 }
 
-func (g *GitHub) fetch(dstURI string, params url.Values, dst interface{}) error {
+func (g *GitHub) fetch(ctx context.Context, dstURI string, params url.Values, dst interface{}) error {
 	tok, err := g.retieveAuthorization()
 	if err != nil {
 		return err
 	}
 
-	if err := g.do(&oauthReq{
+	if err := g.do(ctx, &oauthReq{
 		tok:    tok,
 		method: http.MethodGet,
 		uri:    dstURI,
@@ -229,8 +235,8 @@ func (g *GitHub) checkState(state string) error {
 	return nil
 }
 
-func (g *GitHub) do(r *oauthReq, dst interface{}) error {
-	resp, err := r.do(g.client.conf)
+func (g *GitHub) do(ctx context.Context, r *oauthReq, dst interface{}) error {
+	resp, err := r.do(ctx, g.client.conf)
 	if err != nil {
 		return err
 	}
@@ -250,19 +256,23 @@ type oauthReq struct {
 	params url.Values
 }
 
-func (r *oauthReq) do(conf oauth2.Config) (*http.Response, error) {
-	client := conf.Client(oauth2.NoContext, r.tok)
-	if r.method != http.MethodGet {
-		return client.PostForm(r.uri, r.params)
+func (r *oauthReq) do(ctx context.Context, conf oauth2.Config) (*http.Response, error) {
+	client := conf.Client(context.Background(), r.tok)
+
+	var (
+		uri  = r.uri
+		body io.Reader
+	)
+	if r.method == http.MethodGet {
+		uri += "?" + r.params.Encode()
+	} else {
+		body = strings.NewReader(r.params.Encode())
 	}
 
-	parsed, err := url.Parse(r.uri)
+	req, err := http.NewRequestWithContext(ctx, r.method, uri, body)
 	if err != nil {
 		return nil, err
 	}
-	if r.params != nil {
-		parsed.RawQuery = r.params.Encode()
-	}
 
-	return client.Get(parsed.String())
+	return client.Do(req)
 }

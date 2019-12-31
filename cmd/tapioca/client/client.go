@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -23,8 +24,8 @@ type OfRepos struct {
 	presenter     Presenter
 }
 
-func (c *OfRepos) Run() error {
-	ss, err := c.summarize()
+func (c *OfRepos) Run(ctx context.Context) error {
+	ss, err := c.summarize(ctx)
 	if err != nil {
 		return err
 	}
@@ -36,9 +37,9 @@ func (c *OfRepos) Run() error {
 	return nil
 }
 
-func (c *OfRepos) summarize() ([]*domain.Summary, error) {
+func (c *OfRepos) summarize(ctx context.Context) ([]*domain.Summary, error) {
 	u := newRepoUsecase()
-	return u.SummarizeCommits(c.owner, domain.Params{
+	return u.SummarizeCommits(ctx, c.owner, domain.Params{
 		Author: c.author,
 		Since:  c.since,
 		Until:  c.until,
@@ -59,8 +60,8 @@ type OfRepo struct {
 	presenter           Presenter
 }
 
-func (c *OfRepo) Run() error {
-	s, err := c.summarize()
+func (c *OfRepo) Run(ctx context.Context) error {
+	s, err := c.summarize(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to summarize: %s", err)
 	}
@@ -70,9 +71,9 @@ func (c *OfRepo) Run() error {
 	return nil
 }
 
-func (c *OfRepo) summarize() (*domain.Summary, error) {
+func (c *OfRepo) summarize(ctx context.Context) (*domain.Summary, error) {
 	u := newCommitUsecase()
-	return u.SummarizeCommits(c.owner, c.repo, domain.Params{
+	return u.SummarizeCommits(ctx, c.owner, c.repo, domain.Params{
 		Author: c.author,
 		Since:  c.since,
 		Until:  c.until,

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	clientPkg "github.com/tomocy/tapioca/cmd/tapioca/client"
@@ -12,16 +15,38 @@ import (
 )
 
 func main() {
-	c := newClient()
-	if err := c.Run(); err != nil {
+	conf := parseConfig()
+	c := newClient(conf)
+
+	ctx := contextWithSignals(context.Background(), syscall.SIGINT)
+
+	if err := c.Run(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to run: %s\n", err)
 		os.Exit(1)
 	}
 }
 
-func newClient() client {
-	conf := parseConfig()
+func parseConfig() config {
+	owner, repo := flag.String("owner", "", "name of owner"), flag.String("repo", "", "name of repo")
+	author := flag.String("author", "", "name or email address of author whose commits are summarized")
 
+	var since, until parseableTime
+	flag.Var(&since, "since", "the day since which commits are summarized")
+	flag.Var(&until, "until", "the day until which commits are summarized")
+
+	colorized := flag.Bool("color", false, "colorize the output if true")
+
+	flag.Parse()
+
+	return config{
+		owner: *owner, repo: *repo,
+		author: *author,
+		since:  time.Time(since), until: time.Time(until),
+		colorized: *colorized,
+	}
+}
+
+func newClient(conf config) client {
 	if conf.owner != "" && conf.repo == "" {
 		return clientPkg.NewOfRepos(
 			conf.owner, conf.author,
@@ -45,28 +70,33 @@ func newClient() client {
 	)
 }
 
-type client interface {
-	Run() error
+func contextWithSignals(ctx context.Context, sigs ...os.Signal) context.Context {
+	ctx, cancel := context.WithCancel(ctx)
+	sigCh := make(chan os.Signal)
+	signal.Notify(sigCh, syscall.SIGINT)
+
+	go func() {
+		defer close(sigCh)
+		defer cancel()
+
+		sig := <-sigCh
+		fmt.Println(sig)
+		return
+	}()
+
+	return ctx
 }
 
-func parseConfig() config {
-	owner, repo := flag.String("owner", "", "name of owner"), flag.String("repo", "", "name of repo")
-	author := flag.String("author", "", "name or email address of author whose commits are summarized")
+type config struct {
+	owner        string
+	repo         string
+	author       string
+	since, until time.Time
+	colorized    bool
+}
 
-	var since, until parseableTime
-	flag.Var(&since, "since", "the day since which commits are summarized")
-	flag.Var(&until, "until", "the day until which commits are summarized")
-
-	colorized := flag.Bool("color", false, "colorize the output if true")
-
-	flag.Parse()
-
-	return config{
-		owner: *owner, repo: *repo,
-		author: *author,
-		since:  time.Time(since), until: time.Time(until),
-		colorized: *colorized,
-	}
+type client interface {
+	Run(context.Context) error
 }
 
 type parseableTime time.Time
@@ -84,12 +114,4 @@ func (t *parseableTime) Set(raw string) error {
 
 func (t parseableTime) String() string {
 	return time.Time(t).Format("2006/01/02")
-}
-
-type config struct {
-	owner        string
-	repo         string
-	author       string
-	since, until time.Time
-	colorized    bool
 }

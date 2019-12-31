@@ -1,9 +1,11 @@
 package domain
 
+import "context"
+
 type RepoRepo interface {
-	FetchRepos(owner string) ([]*Repo, error)
+	FetchRepos(context.Context, string) ([]*Repo, error)
 }
 
 type CommitRepo interface {
-	FetchCommits(owner, repo string, params Params) (Commits, error)
+	FetchCommits(context.Context, string, string, Params) (Commits, error)
 }
