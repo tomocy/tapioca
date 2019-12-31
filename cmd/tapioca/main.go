@@ -57,10 +57,46 @@ func (h help) Run() error {
 	return h.err
 }
 
+func parseConfig() config {
+	owner, repo := flag.String("owner", "", "name of owner"), flag.String("repo", "", "name of repo")
+
+	var since, until parseableTime
+	flag.Var(&since, "since", "the day since which commits are summarized")
+	flag.Var(&until, "until", "the day until which commits are summarized")
+
+	colorized := flag.Bool("color", false, "colorize the output if true")
+
+	flag.Parse()
+
+	return config{
+		owner: *owner, repo: *repo,
+		since: time.Time(since), until: time.Time(until),
+		colorized: *colorized,
+	}
+}
+
+type parseableTime time.Time
+
+func (t *parseableTime) Set(raw string) error {
+	parsed, err := time.Parse("2006/01/02", raw)
+	if err != nil {
+		return err
+	}
+
+	*t = parseableTime(parsed)
+
+	return nil
+}
+
+func (t parseableTime) String() string {
+	return time.Time(t).Format("2006/01/02")
+}
+
 type config struct {
 	owner        string
 	repo         string
 	since, until time.Time
+	colorized    bool
 }
 
 type presenter interface {
