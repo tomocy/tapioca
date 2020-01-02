@@ -45,9 +45,13 @@ func (cs Commits) Diff() *Diff {
 }
 
 func (cs Commits) diffs() []*Diff {
-	ds := make([]*Diff, len(cs))
-	for i, c := range cs {
-		ds[i] = c.Diff
+	ds := make([]*Diff, 0, len(cs))
+	for _, c := range cs {
+		if c.Diff == nil {
+			continue
+		}
+
+		ds = append(ds, c.Diff)
 	}
 
 	return ds
