@@ -49,13 +49,13 @@ func loadConfig() (*config, error) {
 
 func saveConfig(cnf *config) error {
 	name := configFilename()
-	dest, err := os.OpenFile(name, os.O_WRONLY, 0700)
+	dst, err := os.OpenFile(name, os.O_WRONLY, 0700)
 	if err != nil {
 		return err
 	}
-	defer dest.Close()
+	defer dst.Close()
 
-	return writeJSON(dest, cnf)
+	return writeJSON(dst, cnf)
 }
 
 func configFilename() string {
@@ -66,12 +66,12 @@ func workspaceName() string {
 	return filepath.Join(os.Getenv("HOME"), ".tapioca")
 }
 
-func readJSON(src io.Reader, dest interface{}) error {
-	return json.NewDecoder(src).Decode(dest)
+func readJSON(src io.Reader, dst interface{}) error {
+	return json.NewDecoder(src).Decode(dst)
 }
 
-func writeJSON(dest io.Writer, src interface{}) error {
-	return json.NewEncoder(dest).Encode(src)
+func writeJSON(dst io.Writer, src interface{}) error {
+	return json.NewEncoder(dst).Encode(src)
 }
 
 type config struct {

@@ -169,9 +169,9 @@ type mock struct {
 	otherdayCs  domain.Commits
 }
 
-func (m *mock) mockAndSetCs(createdIn time.Time, dest *domain.Commits) {
+func (m *mock) mockAndSetCs(createdIn time.Time, dst *domain.Commits) {
 	cs := mockCs(createdIn)
-	*dest = cs
+	*dst = cs
 	m.cs = append(m.cs, cs...)
 }
 
